@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 
 /**
  * The RangeBar is a double-sided version of a {@link android.widget.SeekBar}
@@ -790,6 +791,7 @@ public class RangeBar extends View {
     private void pressThumb(Thumb thumb) {
         if (mFirstSetTickCount == true)
             mFirstSetTickCount = false;
+        attemptClaimDrag();
         thumb.press();
         invalidate();
     }
@@ -823,6 +825,18 @@ public class RangeBar extends View {
         } else {
             thumb.setX(x);
             invalidate();
+        }
+    }
+
+    /**
+     * Tries to claim the user's drag motion, and requests disallowing any
+     * ancestors from stealing events in the drag.
+     */
+    private void attemptClaimDrag() {
+        ViewParent parent = getParent();
+
+        if (parent != null) {
+            parent.requestDisallowInterceptTouchEvent(true);
         }
     }
 
