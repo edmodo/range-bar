@@ -29,6 +29,19 @@ https://github.com/edmodo/range-bar/wiki
 
 ![ScreenShot](http://i.imgur.com/q85GhRjl.png)
 
+Installation
+=======
+
+**build.gradle**
+
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+	  compile 'com.edmodo:rangebar:1.0.0'
+	}
+
 License
 =======
 Copyright 2013, Edmodo, Inc. 

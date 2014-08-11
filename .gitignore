@@ -3,14 +3,21 @@ gen
 *.apk
 .hg/
 local.properties
-*.DS_Store
-*.BridgeSort
-out/
-tmp/
-build/
-.gradle/
-.idea/
+
+# Mac OS X internal files
+.DS_Store
+
+# Eclipse generated files/folders
+.metadata/
+.settings/
+
+#IntelliJ IDEA
+.idea
 *.iml
-.project
-.classpath
-app/src/main/res/values/com_crashlytics_export_strings.xml
+*.ipr
+*.iws
+out
+
+# Gradle folder
+.gradle/
+build/

@@ -296,7 +296,7 @@ public class RangeBar extends View {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 this.getParent().requestDisallowInterceptTouchEvent(false);
-                onActionUp();
+                onActionUp(event.getX(), event.getY());
                 return true;
 
             case MotionEvent.ACTION_MOVE:
@@ -488,13 +488,13 @@ public class RangeBar extends View {
      */
     public void setThumbIndices(int leftThumbIndex, int rightThumbIndex)
     {
-        if (indexOutOfRange(leftThumbIndex, rightThumbIndex))
-        {
+        if (indexOutOfRange(leftThumbIndex, rightThumbIndex)) {
+        	
             Log.e(TAG, "A thumb index is out of bounds. Check that it is between 0 and mTickCount - 1");
             throw new IllegalArgumentException("A thumb index is out of bounds. Check that it is between 0 and mTickCount - 1");
-        }
-
-        else {
+        
+        } else {
+        	
             if (mFirstSetTickCount == true)
                 mFirstSetTickCount = false;
 
@@ -509,7 +509,6 @@ public class RangeBar extends View {
 
         invalidate();
         requestLayout();
-
     }
 
     /**
@@ -728,20 +727,51 @@ public class RangeBar extends View {
     }
 
     /**
-     * Handles a {@link MotionEvent#ACTION_UP} or
+     * Handles a {@link MotionEvent#ACTION_UP} or 
      * {@link MotionEvent#ACTION_CANCEL} event.
+     * 
+     * @param x the x-coordinate of the up action
+     * @param y the y-coordinate of the up action
      */
-    private void onActionUp() {
+    private void onActionUp(float x, float y) {
 
         if (mLeftThumb.isPressed()) {
 
             releaseThumb(mLeftThumb);
 
-        } else if (mRightThumb.isPressed()) {
+		} else if (mRightThumb.isPressed()) {
 
-            releaseThumb(mRightThumb);
-        }
-    }
+			releaseThumb(mRightThumb);
+
+		} else {
+
+			float leftThumbXDistance = Math.abs(mLeftThumb.getX() - x);
+			float rightThumbXDistance = Math.abs(mRightThumb.getX() - x);
+
+			if (leftThumbXDistance < rightThumbXDistance) {
+				mLeftThumb.setX(x);
+				releaseThumb(mLeftThumb);
+			} else {
+				mRightThumb.setX(x);
+				releaseThumb(mRightThumb);
+			}
+
+	        // Get the updated nearest tick marks for each thumb.
+	        final int newLeftIndex = mBar.getNearestTickIndex(mLeftThumb);
+	        final int newRightIndex = mBar.getNearestTickIndex(mRightThumb);
+
+	        // If either of the indices have changed, update and call the listener.
+	        if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex) {
+
+	            mLeftIndex = newLeftIndex;
+	            mRightIndex = newRightIndex;
+
+	            if (mListener != null) {
+	                mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
+	            }
+	        }
+		}
+	}
 
     /**
      * Handles a {@link MotionEvent#ACTION_MOVE} event.
