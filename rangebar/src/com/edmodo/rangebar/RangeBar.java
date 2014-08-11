@@ -243,10 +243,7 @@ public class RangeBar extends View {
 
             mLeftIndex = newLeftIndex;
             mRightIndex = newRightIndex;
-
-            if (mListener != null) {
-                mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-            }
+            notifyListener();
         }
 
         // Create the line connecting the two thumbs.
@@ -283,6 +280,7 @@ public class RangeBar extends View {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 onActionUp(event.getX(), event.getY());
+                getParent().requestDisallowInterceptTouchEvent(false);
                 return true;
 
             case MotionEvent.ACTION_MOVE:
@@ -317,29 +315,23 @@ public class RangeBar extends View {
         if (isValidTickCount(tickCount)) {
             mTickCount = tickCount;
 
+            createBar();
+            createThumbs();
+
             // Prevents resetting the indices when creating new activity, but
             // allows it on the first setting.
             if (mFirstSetTickCount) {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
-
-                if (mListener != null) {
-                    mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-                }
+                notifyListener();
             }
             if (indexOutOfRange(mLeftIndex, mRightIndex))
             {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
-
-                if (mListener != null)
-                    mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
+                notifyListener();
             }
-
-            createBar();
-            createThumbs();
-        }
-        else {
+        } else {
             Log.e(TAG, "tickCount less than 2; invalid tickCount.");
             throw new IllegalArgumentException("tickCount less than 2; invalid tickCount.");
         }
@@ -474,10 +466,7 @@ public class RangeBar extends View {
             mLeftIndex = leftThumbIndex;
             mRightIndex = rightThumbIndex;
             createThumbs();
-
-            if (mListener != null) {
-                mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-            }
+            notifyListener();
         }
 
         invalidate();
@@ -529,10 +518,7 @@ public class RangeBar extends View {
                 mTickCount = tickCount;
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
-
-                if (mListener != null) {
-                    mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-                }
+                notifyListener();
             } else {
 
                 Log.e(TAG, "tickCount less than 2; invalid tickCount. XML input ignored.");
@@ -766,10 +752,21 @@ public class RangeBar extends View {
 
             mLeftIndex = newLeftIndex;
             mRightIndex = newRightIndex;
+            notifyListener();
+        }
+    }
 
-            if (mListener != null) {
-                mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-            }
+    /**
+     * Dispatches a call to the {@link OnRangeBarChangeListener}, containing
+     * the left and right indices, as well as the left and right thumb X
+     * offsets.
+     */
+    private void notifyListener() {
+        if (mListener != null) {
+            final float nearestTickLeft = mBar.getNearestTickCoordinate(mLeftThumb) - mLeftThumb.getHalfWidth();
+            final float nearestTickRight = mBar.getNearestTickCoordinate(mRightThumb) - mRightThumb.getHalfWidth();
+            mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex,
+                    nearestTickLeft, nearestTickRight);
         }
     }
 
@@ -841,6 +838,10 @@ public class RangeBar extends View {
      */
     public static interface OnRangeBarChangeListener {
 
-        public void onIndexChangeListener(RangeBar rangeBar, int leftThumbIndex, int rightThumbIndex);
+        public void onIndexChangeListener(RangeBar rangeBar,
+                int leftThumbIndex,
+                int rightThumbIndex,
+                float leftThumbXOffset,
+                float rightThumbXOffset);
     }
 }
