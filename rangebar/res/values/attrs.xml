@@ -8,10 +8,13 @@
         <attr name="connectingLineWeight" format="dimension" />
         <attr name="connectingLineColor" format="reference|color" />
         <attr name="thumbRadius" format="dimension" />
-        <attr name="thumbImageNormal" format="reference" />
-        <attr name="thumbImagePressed" format="reference" />
-        <attr name="thumbColorNormal" format="reference|color"/>
-        <attr name="thumbColorPressed" format="reference|color"/>
+        <attr name="thumbImage" format="reference" />
+
+        <!-- @deprecated use `thumbImage` to reference individual
+             ShapeDrawables that then reference the desired colors. -->
+        <attr name="thumbColorNormal" format="reference|color" />
+        <!-- @deprecated -->
+        <attr name="thumbColorPressed" format="reference|color" />
     </declare-styleable>
 
 </resources>
