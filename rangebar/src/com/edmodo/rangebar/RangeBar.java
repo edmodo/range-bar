@@ -43,10 +43,10 @@ public class RangeBar extends View {
 
     // Default values for variables
     private static final int DEFAULT_TICK_COUNT = 3;
-    private static final float DEFAULT_TICK_HEIGHT_DP = 24;
+    private static final float DEFAULT_TICK_HEIGHT_DP = -1;
     private static final float DEFAULT_BAR_WEIGHT_PX = 2;
     private static final int DEFAULT_BAR_COLOR = Color.LTGRAY;
-    private static final float DEFAULT_CONNECTING_LINE_WEIGHT_PX = 4;
+    private static final float DEFAULT_CONNECTING_LINE_WEIGHT_DP = -1;
     private static final int DEFAULT_THUMB_IMAGE_NORMAL = -1;
 
     // Corresponds to android.R.color.holo_blue_light.
@@ -62,7 +62,7 @@ public class RangeBar extends View {
     private float mTickHeightDP = DEFAULT_TICK_HEIGHT_DP;
     private float mBarWeight = DEFAULT_BAR_WEIGHT_PX;
     private int mBarColor = DEFAULT_BAR_COLOR;
-    private float mConnectingLineWeight = DEFAULT_CONNECTING_LINE_WEIGHT_PX;
+    private float mConnectingLineWeight = DEFAULT_CONNECTING_LINE_WEIGHT_DP;
     private int mConnectingLineColor = DEFAULT_CONNECTING_LINE_COLOR;
     private int mThumbImageNormal = DEFAULT_THUMB_IMAGE_NORMAL;
 
@@ -544,7 +544,7 @@ public class RangeBar extends View {
             mBarWeight = ta.getDimension(R.styleable.RangeBar_barWeight, DEFAULT_BAR_WEIGHT_PX);
             mBarColor = ta.getColor(R.styleable.RangeBar_barColor, DEFAULT_BAR_COLOR);
             mConnectingLineWeight = ta.getDimension(R.styleable.RangeBar_connectingLineWeight,
-                                                    DEFAULT_CONNECTING_LINE_WEIGHT_PX);
+                                                    DEFAULT_CONNECTING_LINE_WEIGHT_DP);
             mConnectingLineColor = ta.getColor(R.styleable.RangeBar_connectingLineColor,
                                                DEFAULT_CONNECTING_LINE_COLOR);
             mThumbRadiusDP = ta.getDimension(R.styleable.RangeBar_thumbRadius, DEFAULT_THUMB_RADIUS_DP);
