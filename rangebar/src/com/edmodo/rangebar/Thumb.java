@@ -202,7 +202,7 @@ class Thumb {
         // If a bitmap is to be printed. Determined by thumbRadius attribute.
         int saveCount = canvas.save();
 
-        canvas.translate(mX - mHalfWidthNormal, 0);
+        canvas.translate(mX - mHalfWidthNormal, mY - mHalfHeightNormal);
         mImageNormal.draw(canvas);
 
         canvas.restoreToCount(saveCount);
