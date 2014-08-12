@@ -763,10 +763,11 @@ public class RangeBar extends View {
      */
     private void notifyListener() {
         if (mListener != null) {
-            final float nearestTickLeft = mBar.getNearestTickCoordinate(mLeftThumb) - mLeftThumb.getHalfWidth();
-            final float nearestTickRight = mBar.getNearestTickCoordinate(mRightThumb) - mRightThumb.getHalfWidth();
+            final float nearestTickLeft = mBar.getNearestTickCoordinate(mLeftThumb);
+            final float nearestTickRight = mBar.getNearestTickCoordinate(mRightThumb);
             mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex,
-                    nearestTickLeft, nearestTickRight);
+                    nearestTickLeft, nearestTickRight,
+                    mLeftThumb.isPressed(), mRightThumb.isPressed());
         }
     }
 
@@ -842,6 +843,8 @@ public class RangeBar extends View {
                 int leftThumbIndex,
                 int rightThumbIndex,
                 float leftThumbXOffset,
-                float rightThumbXOffset);
+                float rightThumbXOffset,
+                boolean isLeftThumbPressed,
+                boolean isRightThumbPressed);
     }
 }
