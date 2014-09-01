@@ -1,14 +1,14 @@
 /*
- * Copyright 2013, Edmodo, Inc. 
+ * Copyright 2013, Edmodo, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License.
  * You may obtain a copy of the License in the LICENSE file, or at:
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" 
- * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language 
- * governing permissions and limitations under the License. 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS"
+ * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 
 package com.edmodo.rangebar;
@@ -23,6 +23,7 @@ import android.util.TypedValue;
  * thumbs).
  */
 class Bar {
+    private static final float DEFAULT_TICK_HEIGHT_DP = 24;
 
     // Member Variables ////////////////////////////////////////////////////////
 
@@ -42,13 +43,13 @@ class Bar {
     // Constructor /////////////////////////////////////////////////////////////
 
     Bar(Context ctx,
-        float x,
-        float y,
-        float length,
-        int tickCount,
-        float tickHeightDP,
-        float BarWeight,
-        int BarColor) {
+            float x,
+            float y,
+            float length,
+            int tickCount,
+            float tickHeightDP,
+            float barWeight,
+            int barColor) {
 
         mLeftX = x;
         mRightX = x + length;
@@ -56,26 +57,31 @@ class Bar {
 
         mNumSegments = tickCount - 1;
         mTickDistance = length / mNumSegments;
-        mTickHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                                                tickHeightDP,
-                                                ctx.getResources().getDisplayMetrics());
+
+        if (tickHeightDP == -1) {
+            tickHeightDP = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    DEFAULT_TICK_HEIGHT_DP,
+                    ctx.getResources().getDisplayMetrics());
+        }
+
+        mTickHeight = tickHeightDP;
+
         mTickStartY = mY - mTickHeight / 2f;
         mTickEndY = mY + mTickHeight / 2f;
 
         // Initialize the paint.
         mPaint = new Paint();
-        mPaint.setColor(BarColor);
-        mPaint.setStrokeWidth(BarWeight);
-        mPaint.setAntiAlias(true);
+        mPaint.setColor(barColor);
+        mPaint.setStrokeWidth(barWeight);
     }
 
     // Package-Private Methods /////////////////////////////////////////////////
 
     /**
      * Draws the bar on the given Canvas.
-     * 
+     *
      * @param canvas Canvas to draw on; should be the Canvas passed into {#link
-     *            View#onDraw()}
+     * View#onDraw()}
      */
     void draw(Canvas canvas) {
 
@@ -86,7 +92,7 @@ class Bar {
 
     /**
      * Get the x-coordinate of the left edge of the bar.
-     * 
+     *
      * @return x-coordinate of the left edge of the bar
      */
     float getLeftX() {
@@ -95,7 +101,7 @@ class Bar {
 
     /**
      * Get the x-coordinate of the right edge of the bar.
-     * 
+     *
      * @return x-coordinate of the right edge of the bar
      */
     float getRightX() {
@@ -104,8 +110,8 @@ class Bar {
 
     /**
      * Gets the x-coordinate of the nearest tick to the given x-coordinate.
-     * 
-     * @param x the x-coordinate to find the nearest tick for
+     *
+     * @param thumb the thumb to find the nearest tick for
      * @return the x-coordinate of the nearest tick
      */
     float getNearestTickCoordinate(Thumb thumb) {
@@ -119,7 +125,7 @@ class Bar {
 
     /**
      * Gets the zero-based index of the nearest tick to the given thumb.
-     * 
+     *
      * @param thumb the Thumb to find the nearest tick for
      * @return the zero-based index of the nearest tick
      */
@@ -132,7 +138,7 @@ class Bar {
 
     /**
      * Set the number of ticks that will appear in the RangeBar.
-     * 
+     *
      * @param tickCount the number of ticks
      */
     void setTickCount(int tickCount) {
@@ -147,9 +153,9 @@ class Bar {
 
     /**
      * Draws the tick marks on the bar.
-     * 
+     *
      * @param canvas Canvas to draw on; should be the Canvas passed into {#link
-     *            View#onDraw()}
+     * View#onDraw()}
      */
     private void drawTicks(Canvas canvas) {
 

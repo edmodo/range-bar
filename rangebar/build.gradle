@@ -41,44 +41,46 @@ task publishLocal(type: Upload) {
 }
 
 uploadArchives {
-    repositories.mavenDeployer {
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+    if (project.hasProperty("sonatypeRepo")) {
+        repositories.mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-        repository(url: sonatypeRepo) {
-            authentication(userName: sonatypeUsername,
-                    password: sonatypePassword)
-        }
-
-        pom.project {
-            name 'RangeBar'
-            packaging 'aar'
-            description 'RangeBar library for Android applications'
-            url 'https://github.com/edmodo/range-bar'
-
-            scm {
-                url 'scm:git@github.com:edmodo/range-bar.git'
-                connection 'scm:git@github.com:edmodo/range-bar.git'
-                developerConnection 'scm:git@github.com:edmodo/range-bar.git'
+            repository(url: sonatypeRepo) {
+                authentication(userName: sonatypeUsername,
+                        password: sonatypePassword)
             }
 
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution 'repo'
-                }
-            }
+            pom.project {
+                name 'RangeBar'
+                packaging 'aar'
+                description 'RangeBar library for Android applications'
+                url 'https://github.com/edmodo/range-bar'
 
-            developers {
-                developer {
-                    id 'ahuang13'
-                    name 'Angus Huang'
-                    email 'angus@edmodo.com'
+                scm {
+                    url 'scm:git@github.com:edmodo/range-bar.git'
+                    connection 'scm:git@github.com:edmodo/range-bar.git'
+                    developerConnection 'scm:git@github.com:edmodo/range-bar.git'
                 }
-                developer {
-                    id 'TT1943'
-                    name 'Xiahong Lin'
-                    email 'xiahong@edmodo.com'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'ahuang13'
+                        name 'Angus Huang'
+                        email 'angus@edmodo.com'
+                    }
+                    developer {
+                        id 'TT1943'
+                        name 'Xiahong Lin'
+                        email 'xiahong@edmodo.com'
+                    }
                 }
             }
         }

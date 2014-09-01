@@ -1,19 +1,20 @@
 /*
- * Copyright 2013, Edmodo, Inc. 
+ * Copyright 2013, Edmodo, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License.
  * You may obtain a copy of the License in the LICENSE file, or at:
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" 
- * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language 
- * governing permissions and limitations under the License. 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS"
+ * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 
 package com.edmodo.rangebar;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -23,6 +24,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.ViewParent;
 
 /**
  * The RangeBar is a double-sided version of a {@link android.widget.SeekBar}
@@ -30,9 +33,9 @@ import android.view.View;
  * position in the bar, the RangeBar only allows its thumbs to be dragged to
  * discrete positions (denoted by tick marks) in the bar. When released, a
  * RangeBar thumb will snap to the nearest tick mark.
- * <p>
+ * <p/>
  * Clients of the RangeBar can attach a
- * {@link RangeBar#OnRangeBarChangeListener} to be notified when the thumbs have
+ * {@link OnRangeBarChangeListener} to be notified when the thumbs have
  * been moved.
  */
 public class RangeBar extends View {
@@ -43,12 +46,11 @@ public class RangeBar extends View {
 
     // Default values for variables
     private static final int DEFAULT_TICK_COUNT = 3;
-    private static final float DEFAULT_TICK_HEIGHT_DP = 24;
+    private static final float DEFAULT_TICK_HEIGHT_DP = -1;
     private static final float DEFAULT_BAR_WEIGHT_PX = 2;
     private static final int DEFAULT_BAR_COLOR = Color.LTGRAY;
-    private static final float DEFAULT_CONNECTING_LINE_WEIGHT_PX = 4;
-    private static final int DEFAULT_THUMB_IMAGE_NORMAL = R.drawable.seek_thumb_normal;
-    private static final int DEFAULT_THUMB_IMAGE_PRESSED = R.drawable.seek_thumb_pressed;
+    private static final float DEFAULT_CONNECTING_LINE_WEIGHT_DP = -1;
+    private static final int DEFAULT_THUMB_IMAGE_NORMAL = -1;
 
     // Corresponds to android.R.color.holo_blue_light.
     private static final int DEFAULT_CONNECTING_LINE_COLOR = 0xff33b5e5;
@@ -63,10 +65,9 @@ public class RangeBar extends View {
     private float mTickHeightDP = DEFAULT_TICK_HEIGHT_DP;
     private float mBarWeight = DEFAULT_BAR_WEIGHT_PX;
     private int mBarColor = DEFAULT_BAR_COLOR;
-    private float mConnectingLineWeight = DEFAULT_CONNECTING_LINE_WEIGHT_PX;
-    private int mConnectingLineColor = DEFAULT_CONNECTING_LINE_COLOR;
+    private float mConnectingLineWeight = DEFAULT_CONNECTING_LINE_WEIGHT_DP;
+    private ColorStateList mConnectingLineColor = ColorStateList.valueOf(DEFAULT_CONNECTING_LINE_COLOR);
     private int mThumbImageNormal = DEFAULT_THUMB_IMAGE_NORMAL;
-    private int mThumbImagePressed = DEFAULT_THUMB_IMAGE_PRESSED;
 
     private float mThumbRadiusDP = DEFAULT_THUMB_RADIUS_DP;
     private int mThumbColorNormal = DEFAULT_THUMB_COLOR_NORMAL;
@@ -84,9 +85,13 @@ public class RangeBar extends View {
     private Bar mBar;
     private ConnectingLine mConnectingLine;
 
-    private RangeBar.OnRangeBarChangeListener mListener;
+    private OnRangeBarChangeListener mListener;
     private int mLeftIndex = 0;
     private int mRightIndex = mTickCount - 1;
+    private int mScaledTouchSlop;
+
+    private boolean mIsMeasured = false;
+    private boolean mNotifyOnMeasure = false;
 
     // Constructors ////////////////////////////////////////////////////////////
 
@@ -118,10 +123,9 @@ public class RangeBar extends View {
         bundle.putFloat("BAR_WEIGHT", mBarWeight);
         bundle.putInt("BAR_COLOR", mBarColor);
         bundle.putFloat("CONNECTING_LINE_WEIGHT", mConnectingLineWeight);
-        bundle.putInt("CONNECTING_LINE_COLOR", mConnectingLineColor);
+        bundle.putParcelable("CONNECTING_LINE_COLOR", mConnectingLineColor);
 
         bundle.putInt("THUMB_IMAGE_NORMAL", mThumbImageNormal);
-        bundle.putInt("THUMB_IMAGE_PRESSED", mThumbImagePressed);
 
         bundle.putFloat("THUMB_RADIUS_DP", mThumbRadiusDP);
         bundle.putInt("THUMB_COLOR_NORMAL", mThumbColorNormal);
@@ -147,10 +151,9 @@ public class RangeBar extends View {
             mBarWeight = bundle.getFloat("BAR_WEIGHT");
             mBarColor = bundle.getInt("BAR_COLOR");
             mConnectingLineWeight = bundle.getFloat("CONNECTING_LINE_WEIGHT");
-            mConnectingLineColor = bundle.getInt("CONNECTING_LINE_COLOR");
+            mConnectingLineColor = bundle.getParcelable("CONNECTING_LINE_COLOR");
 
             mThumbImageNormal = bundle.getInt("THUMB_IMAGE_NORMAL");
-            mThumbImagePressed = bundle.getInt("THUMB_IMAGE_PRESSED");
 
             mThumbRadiusDP = bundle.getFloat("THUMB_RADIUS_DP");
             mThumbColorNormal = bundle.getInt("THUMB_COLOR_NORMAL");
@@ -163,7 +166,6 @@ public class RangeBar extends View {
             setThumbIndices(mLeftIndex, mRightIndex);
 
             super.onRestoreInstanceState(bundle.getParcelable("instanceState"));
-
         } else {
 
             super.onRestoreInstanceState(state);
@@ -219,15 +221,13 @@ public class RangeBar extends View {
                                mThumbColorNormal,
                                mThumbColorPressed,
                                mThumbRadiusDP,
-                               mThumbImageNormal,
-                               mThumbImagePressed);
+                               mThumbImageNormal);
         mRightThumb = new Thumb(ctx,
                                 yPos,
                                 mThumbColorNormal,
                                 mThumbColorPressed,
                                 mThumbRadiusDP,
-                                mThumbImageNormal,
-                                mThumbImagePressed);
+                                mThumbImageNormal);
 
         // Create the underlying bar.
         final float marginLeft = mLeftThumb.getHalfWidth();
@@ -238,23 +238,13 @@ public class RangeBar extends View {
         mLeftThumb.setX(marginLeft + (mLeftIndex / (float) (mTickCount - 1)) * barLength);
         mRightThumb.setX(marginLeft + (mRightIndex / (float) (mTickCount - 1)) * barLength);
 
-        // Set the thumb indices.
-        final int newLeftIndex = mBar.getNearestTickIndex(mLeftThumb);
-        final int newRightIndex = mBar.getNearestTickIndex(mRightThumb);
-
-        // Call the listener.
-        if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex) {
-
-            mLeftIndex = newLeftIndex;
-            mRightIndex = newRightIndex;
-
-            if (mListener != null) {
-                mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-            }
-        }
-
         // Create the line connecting the two thumbs.
         mConnectingLine = new ConnectingLine(ctx, yPos, mConnectingLineWeight, mConnectingLineColor);
+        mConnectingLine.setState(getDrawableState());
+
+        mIsMeasured = true;
+
+        evaluateNewIndices();
     }
 
     @Override
@@ -268,7 +258,6 @@ public class RangeBar extends View {
 
         mLeftThumb.draw(canvas);
         mRightThumb.draw(canvas);
-
     }
 
     @Override
@@ -287,13 +276,12 @@ public class RangeBar extends View {
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                this.getParent().requestDisallowInterceptTouchEvent(false);
                 onActionUp(event.getX(), event.getY());
+                getParent().requestDisallowInterceptTouchEvent(false);
                 return true;
 
             case MotionEvent.ACTION_MOVE:
                 onActionMove(event.getX());
-                this.getParent().requestDisallowInterceptTouchEvent(true);
                 return true;
 
             default:
@@ -306,17 +294,17 @@ public class RangeBar extends View {
     /**
      * Sets a listener to receive notifications of changes to the RangeBar. This
      * will overwrite any existing set listeners.
-     * 
+     *
      * @param listener the RangeBar notification listener; null to remove any
      *            existing listener
      */
-    public void setOnRangeBarChangeListener(RangeBar.OnRangeBarChangeListener listener) {
+    public void setOnRangeBarChangeListener(OnRangeBarChangeListener listener) {
         mListener = listener;
     }
 
     /**
      * Sets the number of ticks in the RangeBar.
-     * 
+     *
      * @param tickCount Integer specifying the number of ticks.
      */
     public void setTickCount(int tickCount) {
@@ -324,29 +312,23 @@ public class RangeBar extends View {
         if (isValidTickCount(tickCount)) {
             mTickCount = tickCount;
 
+            createBar();
+            createThumbs();
+
             // Prevents resetting the indices when creating new activity, but
             // allows it on the first setting.
             if (mFirstSetTickCount) {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
-
-                if (mListener != null) {
-                    mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-                }
+                notifyListener();
             }
             if (indexOutOfRange(mLeftIndex, mRightIndex))
             {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
-
-                if (mListener != null)
-                    mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
+                notifyListener();
             }
-
-            createBar();
-            createThumbs();
-        }
-        else {
+        } else {
             Log.e(TAG, "tickCount less than 2; invalid tickCount.");
             throw new IllegalArgumentException("tickCount less than 2; invalid tickCount.");
         }
@@ -354,7 +336,7 @@ public class RangeBar extends View {
 
     /**
      * Sets the height of the ticks in the range bar.
-     * 
+     *
      * @param tickHeight Float specifying the height of each tick mark in dp.
      */
     public void setTickHeight(float tickHeight) {
@@ -365,7 +347,7 @@ public class RangeBar extends View {
 
     /**
      * Set the weight of the bar line and the tick lines in the range bar.
-     * 
+     *
      * @param barWeight Float specifying the weight of the bar and tick lines in
      *            px.
      */
@@ -377,7 +359,7 @@ public class RangeBar extends View {
 
     /**
      * Set the color of the bar line and the tick lines in the range bar.
-     * 
+     *
      * @param barColor Integer specifying the color of the bar line.
      */
     public void setBarColor(int barColor) {
@@ -388,32 +370,46 @@ public class RangeBar extends View {
 
     /**
      * Set the weight of the connecting line between the thumbs.
-     * 
+     *
      * @param connectingLineWeight Float specifying the weight of the connecting
      *            line.
      */
     public void setConnectingLineWeight(float connectingLineWeight) {
 
         mConnectingLineWeight = connectingLineWeight;
-        createConnectingLine();
+        mConnectingLine.setWeight(mConnectingLineWeight);
+        invalidate();
     }
 
     /**
      * Set the color of the connecting line between the thumbs.
-     * 
+     *
      * @param connectingLineColor Integer specifying the color of the connecting
      *            line.
      */
     public void setConnectingLineColor(int connectingLineColor) {
 
-        mConnectingLineColor = connectingLineColor;
-        createConnectingLine();
+        mConnectingLineColor = ColorStateList.valueOf(connectingLineColor);
+        mConnectingLine.setColor(mConnectingLineColor);
+        invalidate();
+    }
+
+    /**
+     * Set the color selector of the connecting line between the thumbs.
+     *
+     * @param colors stateful color selector
+     */
+    public void setConnectingLineColor(ColorStateList colors) {
+
+        mConnectingLineColor = colors;
+        mConnectingLine.setColor(mConnectingLineColor);
+        invalidate();
     }
 
     /**
      * If this is set, the thumb images will be replaced with a circle of the
      * specified radius. Default width = 20dp.
-     * 
+     *
      * @param thumbRadius Float specifying the radius of the thumbs to be drawn.
      */
     public void setThumbRadius(float thumbRadius) {
@@ -424,9 +420,9 @@ public class RangeBar extends View {
 
     /**
      * Sets the normal thumb picture by taking in a reference ID to an image.
-     * 
-     * @param thumbNormalID Integer specifying the resource ID of the image to
-     *            be drawn as the normal thumb.
+     *
+     * @param thumbImageNormalID Integer specifying the resource ID of the image to
+     * be drawn as the normal thumb.
      */
     public void setThumbImageNormal(int thumbImageNormalID) {
         mThumbImageNormal = thumbImageNormalID;
@@ -434,21 +430,9 @@ public class RangeBar extends View {
     }
 
     /**
-     * Sets the pressed thumb picture by taking in a reference ID to an image.
-     * 
-     * @param pressedThumbID Integer specifying the resource ID of the image to
-     *            be drawn as the pressed thumb.
-     */
-    public void setThumbImagePressed(int thumbImagePressedID)
-    {
-        mThumbImagePressed = thumbImagePressedID;
-        createThumbs();
-    }
-
-    /**
      * If this is set, the thumb images will be replaced with a circle. The
      * normal image will be of the specified color.
-     * 
+     *
      * @param thumbColorNormal Integer specifying the normal color of the circle
      *            to be drawn.
      */
@@ -461,7 +445,7 @@ public class RangeBar extends View {
     /**
      * If this is set, the thumb images will be replaced with a circle. The
      * pressed image will be of the specified color.
-     * 
+     *
      * @param thumbColorPressed Integer specifying the pressed color of the
      *            circle to be drawn.
      */
@@ -474,29 +458,26 @@ public class RangeBar extends View {
     /**
      * Sets the location of each thumb according to the developer's choice.
      * Numbered from 0 to mTickCount - 1 from the left.
-     * 
+     *
      * @param leftThumbIndex Integer specifying the index of the left thumb
      * @param rightThumbIndex Integer specifying the index of the right thumb
      */
     public void setThumbIndices(int leftThumbIndex, int rightThumbIndex)
     {
         if (indexOutOfRange(leftThumbIndex, rightThumbIndex)) {
-        	
+
             Log.e(TAG, "A thumb index is out of bounds. Check that it is between 0 and mTickCount - 1");
             throw new IllegalArgumentException("A thumb index is out of bounds. Check that it is between 0 and mTickCount - 1");
-        
+
         } else {
-        	
+
             if (mFirstSetTickCount == true)
                 mFirstSetTickCount = false;
 
             mLeftIndex = leftThumbIndex;
             mRightIndex = rightThumbIndex;
             createThumbs();
-
-            if (mListener != null) {
-                mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-            }
+            notifyListener();
         }
 
         invalidate();
@@ -505,7 +486,7 @@ public class RangeBar extends View {
 
     /**
      * Gets the index of the left-most thumb.
-     * 
+     *
      * @return the 0-based index of the left thumb
      */
     public int getLeftIndex() {
@@ -514,11 +495,23 @@ public class RangeBar extends View {
 
     /**
      * Gets the index of the right-most thumb.
-     * 
+     *
      * @return the 0-based index of the right thumb
      */
     public int getRightIndex() {
         return mRightIndex;
+    }
+
+    @Override
+    public void refreshDrawableState() {
+        super.refreshDrawableState();
+        if (mConnectingLine != null) mConnectingLine.setState(getDrawableState());
+
+        if (mLeftThumb != null && mRightThumb != null) {
+            boolean isEnabled = isEnabled();
+            mLeftThumb.setEnabled(isEnabled);
+            mRightThumb.setEnabled(isEnabled);
+        }
     }
 
     // Private Methods /////////////////////////////////////////////////////////
@@ -526,7 +519,7 @@ public class RangeBar extends View {
     /**
      * Does all the functions of the constructor for RangeBar. Called by both
      * RangeBar constructors in lieu of copying the code for each constructor.
-     * 
+     *
      * @param context Context from the constructor.
      * @param attrs AttributeSet from the constructor.
      * @return none
@@ -548,11 +541,6 @@ public class RangeBar extends View {
                 mTickCount = tickCount;
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
-
-                if (mListener != null) {
-                    mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-                }
-
             } else {
 
                 Log.e(TAG, "tickCount less than 2; invalid tickCount. XML input ignored.");
@@ -562,29 +550,30 @@ public class RangeBar extends View {
             mBarWeight = ta.getDimension(R.styleable.RangeBar_barWeight, DEFAULT_BAR_WEIGHT_PX);
             mBarColor = ta.getColor(R.styleable.RangeBar_barColor, DEFAULT_BAR_COLOR);
             mConnectingLineWeight = ta.getDimension(R.styleable.RangeBar_connectingLineWeight,
-                                                    DEFAULT_CONNECTING_LINE_WEIGHT_PX);
-            mConnectingLineColor = ta.getColor(R.styleable.RangeBar_connectingLineColor,
-                                               DEFAULT_CONNECTING_LINE_COLOR);
+                                                    DEFAULT_CONNECTING_LINE_WEIGHT_DP);
+
+            ColorStateList csl = ta.getColorStateList(R.styleable.RangeBar_connectingLineColor);
+            if (csl != null) mConnectingLineColor = csl;
+
             mThumbRadiusDP = ta.getDimension(R.styleable.RangeBar_thumbRadius, DEFAULT_THUMB_RADIUS_DP);
-            mThumbImageNormal = ta.getResourceId(R.styleable.RangeBar_thumbImageNormal,
+            mThumbImageNormal = ta.getResourceId(R.styleable.RangeBar_thumbImage,
                                                  DEFAULT_THUMB_IMAGE_NORMAL);
-            mThumbImagePressed = ta.getResourceId(R.styleable.RangeBar_thumbImagePressed,
-                                                  DEFAULT_THUMB_IMAGE_PRESSED);
             mThumbColorNormal = ta.getColor(R.styleable.RangeBar_thumbColorNormal, DEFAULT_THUMB_COLOR_NORMAL);
             mThumbColorPressed = ta.getColor(R.styleable.RangeBar_thumbColorPressed,
                                              DEFAULT_THUMB_COLOR_PRESSED);
+
+            setEnabled(ta.getBoolean(R.styleable.RangeBar_android_enabled, true));
 
         } finally {
 
             ta.recycle();
         }
 
+        mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
     /**
      * Creates a new mBar
-     * 
-     * @param none
      */
     private void createBar() {
 
@@ -600,23 +589,7 @@ public class RangeBar extends View {
     }
 
     /**
-     * Creates a new ConnectingLine.
-     * 
-     * @param none
-     */
-    private void createConnectingLine() {
-
-        mConnectingLine = new ConnectingLine(getContext(),
-                                             getYPos(),
-                                             mConnectingLineWeight,
-                                             mConnectingLineColor);
-        invalidate();
-    }
-
-    /**
      * Creates two new Thumbs.
-     * 
-     * @param none
      */
     private void createThumbs() {
 
@@ -628,15 +601,13 @@ public class RangeBar extends View {
                                mThumbColorNormal,
                                mThumbColorPressed,
                                mThumbRadiusDP,
-                               mThumbImageNormal,
-                               mThumbImagePressed);
+                               mThumbImageNormal);
         mRightThumb = new Thumb(ctx,
                                 yPos,
                                 mThumbColorNormal,
                                 mThumbColorPressed,
                                 mThumbRadiusDP,
-                                mThumbImageNormal,
-                                mThumbImagePressed);
+                                mThumbImageNormal);
 
         float marginLeft = getMarginLeft();
         float barLength = getBarLength();
@@ -645,13 +616,14 @@ public class RangeBar extends View {
         mLeftThumb.setX(marginLeft + (mLeftIndex / (float) (mTickCount - 1)) * barLength);
         mRightThumb.setX(marginLeft + (mRightIndex / (float) (mTickCount - 1)) * barLength);
 
+        refreshDrawableState();
+
         invalidate();
     }
 
     /**
      * Get marginLeft in each of the public attribute methods.
-     * 
-     * @param none
+     *
      * @return float marginLeft
      */
     private float getMarginLeft() {
@@ -660,8 +632,7 @@ public class RangeBar extends View {
 
     /**
      * Get yPos in each of the public attribute methods.
-     * 
-     * @param none
+     *
      * @return float yPos
      */
     private float getYPos() {
@@ -670,8 +641,7 @@ public class RangeBar extends View {
 
     /**
      * Get barLength in each of the public attribute methods.
-     * 
-     * @param none
+     *
      * @return float barLength
      */
     private float getBarLength() {
@@ -680,7 +650,7 @@ public class RangeBar extends View {
 
     /**
      * Returns if either index is outside the range of the tickCount.
-     * 
+     *
      * @param leftThumbIndex Integer specifying the left thumb index.
      * @param rightThumbIndex Integer specifying the right thumb index.
      * @return boolean If the index is out of range.
@@ -693,7 +663,7 @@ public class RangeBar extends View {
 
     /**
      * If is invalid tickCount, rejects. TickCount must be greater than 1
-     * 
+     *
      * @param tickCount Integer
      * @return boolean: whether tickCount > 1
      */
@@ -703,7 +673,7 @@ public class RangeBar extends View {
 
     /**
      * Handles a {@link MotionEvent#ACTION_DOWN} event.
-     * 
+     *
      * @param x the x-coordinate of the down action
      * @param y the y-coordinate of the down action
      */
@@ -712,17 +682,29 @@ public class RangeBar extends View {
         if (!mLeftThumb.isPressed() && mLeftThumb.isInTargetZone(x, y)) {
 
             pressThumb(mLeftThumb);
-
         } else if (!mLeftThumb.isPressed() && mRightThumb.isInTargetZone(x, y)) {
 
             pressThumb(mRightThumb);
+        } else {
+            // It's not in either thumb's target zone, but assume this is meant
+            // to be a tap-to-seek event and press the closest thumb.
+            // This allows a sloppy touch gesture to pick up the closest thumb for dragging.
+            float leftThumbXDistance = Math.abs(mLeftThumb.getX() - x);
+            float rightThumbXDistance = Math.abs(mRightThumb.getX() - x);
+
+            if (leftThumbXDistance < mScaledTouchSlop || rightThumbXDistance < mScaledTouchSlop) {
+                Thumb closestThumb = leftThumbXDistance < rightThumbXDistance ? mLeftThumb : mRightThumb;
+                pressThumb(closestThumb);
+                moveThumb(closestThumb, x);
+            }
+            // else this will be handled in onActionUp()
         }
     }
 
     /**
-     * Handles a {@link MotionEvent#ACTION_UP} or 
+     * Handles a {@link MotionEvent#ACTION_UP} or
      * {@link MotionEvent#ACTION_CANCEL} event.
-     * 
+     *
      * @param x the x-coordinate of the up action
      * @param y the y-coordinate of the up action
      */
@@ -731,44 +713,29 @@ public class RangeBar extends View {
         if (mLeftThumb.isPressed()) {
 
             releaseThumb(mLeftThumb);
+        } else if (mRightThumb.isPressed()) {
 
-		} else if (mRightThumb.isPressed()) {
+            releaseThumb(mRightThumb);
+        } else {
 
-			releaseThumb(mRightThumb);
+            float leftThumbXDistance = Math.abs(mLeftThumb.getX() - x);
+            float rightThumbXDistance = Math.abs(mRightThumb.getX() - x);
 
-		} else {
+            if (leftThumbXDistance < rightThumbXDistance) {
+                mLeftThumb.setX(x);
+                releaseThumb(mLeftThumb);
+            } else {
+                mRightThumb.setX(x);
+                releaseThumb(mRightThumb);
+            }
 
-			float leftThumbXDistance = Math.abs(mLeftThumb.getX() - x);
-			float rightThumbXDistance = Math.abs(mRightThumb.getX() - x);
-
-			if (leftThumbXDistance < rightThumbXDistance) {
-				mLeftThumb.setX(x);
-				releaseThumb(mLeftThumb);
-			} else {
-				mRightThumb.setX(x);
-				releaseThumb(mRightThumb);
-			}
-
-	        // Get the updated nearest tick marks for each thumb.
-	        final int newLeftIndex = mBar.getNearestTickIndex(mLeftThumb);
-	        final int newRightIndex = mBar.getNearestTickIndex(mRightThumb);
-
-	        // If either of the indices have changed, update and call the listener.
-	        if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex) {
-
-	            mLeftIndex = newLeftIndex;
-	            mRightIndex = newRightIndex;
-
-	            if (mListener != null) {
-	                mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-	            }
-	        }
-		}
-	}
+            evaluateNewIndices();
+        }
+    }
 
     /**
      * Handles a {@link MotionEvent#ACTION_MOVE} event.
-     * 
+     *
      * @param x the x-coordinate of the move event
      */
     private void onActionMove(float x) {
@@ -787,31 +754,55 @@ public class RangeBar extends View {
             mRightThumb = temp;
         }
 
+        evaluateNewIndices();
+    }
+
+    /** Evaluates the current closest indices for each thumb and notifies if either index changed. */
+    private void evaluateNewIndices() {
         // Get the updated nearest tick marks for each thumb.
         final int newLeftIndex = mBar.getNearestTickIndex(mLeftThumb);
         final int newRightIndex = mBar.getNearestTickIndex(mRightThumb);
 
         // If either of the indices have changed, update and call the listener.
-        if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex) {
+        if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex || mNotifyOnMeasure) {
 
+            mNotifyOnMeasure = false;
             mLeftIndex = newLeftIndex;
             mRightIndex = newRightIndex;
+            notifyListener();
+        }
+    }
 
-            if (mListener != null) {
-                mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-            }
+    /**
+     * Dispatches a call to the {@link OnRangeBarChangeListener}, containing
+     * the left and right indices, as well as the left and right thumb X
+     * offsets.
+     */
+    private void notifyListener() {
+        if (!mIsMeasured) {
+            mNotifyOnMeasure = true;
+            return;
+        }
+
+        if (mListener != null) {
+            final float nearestTickLeft = mBar.getNearestTickCoordinate(mLeftThumb);
+            final float nearestTickRight = mBar.getNearestTickCoordinate(mRightThumb);
+            mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex,
+                    nearestTickLeft, nearestTickRight,
+                    mLeftThumb.isPressed(), mRightThumb.isPressed());
         }
     }
 
     /**
      * Set the thumb to be in the pressed state and calls invalidate() to redraw
      * the canvas to reflect the updated state.
-     * 
+     *
      * @param thumb the thumb to press
      */
     private void pressThumb(Thumb thumb) {
         if (mFirstSetTickCount == true)
             mFirstSetTickCount = false;
+        attemptClaimDrag();
         thumb.press();
         invalidate();
     }
@@ -819,7 +810,7 @@ public class RangeBar extends View {
     /**
      * Set the thumb to be in the normal/un-pressed state and calls invalidate()
      * to redraw the canvas to reflect the updated state.
-     * 
+     *
      * @param thumb the thumb to release
      */
     private void releaseThumb(Thumb thumb) {
@@ -832,7 +823,7 @@ public class RangeBar extends View {
 
     /**
      * Moves the thumb to the given x-coordinate.
-     * 
+     *
      * @param thumb the thumb to move
      * @param x the x-coordinate to move the thumb to
      */
@@ -843,8 +834,21 @@ public class RangeBar extends View {
         if (x < mBar.getLeftX() || x > mBar.getRightX()) {
             // Do nothing.
         } else {
+            attemptClaimDrag();
             thumb.setX(x);
             invalidate();
+        }
+    }
+
+    /**
+     * Tries to claim the user's drag motion, and requests disallowing any
+     * ancestors from stealing events in the drag.
+     */
+    private void attemptClaimDrag() {
+        ViewParent parent = getParent();
+
+        if (parent != null) {
+            parent.requestDisallowInterceptTouchEvent(true);
         }
     }
 
@@ -857,6 +861,12 @@ public class RangeBar extends View {
      */
     public static interface OnRangeBarChangeListener {
 
-        public void onIndexChangeListener(RangeBar rangeBar, int leftThumbIndex, int rightThumbIndex);
+        public void onIndexChangeListener(RangeBar rangeBar,
+                int leftThumbIndex,
+                int rightThumbIndex,
+                float leftThumbXOffset,
+                float rightThumbXOffset,
+                boolean isLeftThumbPressed,
+                boolean isRightThumbPressed);
     }
 }
