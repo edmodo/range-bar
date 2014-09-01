@@ -14,6 +14,7 @@
 package com.edmodo.rangebar;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -29,12 +30,14 @@ class ConnectingLine {
 
     private final Paint mPaint;
 
-    private final float mConnectingLineWeight;
     private final float mY;
+    private ColorStateList mConnectingLineColor;
+
+    private int[] mState = {};
 
     // Constructor /////////////////////////////////////////////////////////////
 
-    ConnectingLine(Context ctx, float y, float connectingLineWeight, int connectingLineColor) {
+    ConnectingLine(Context ctx, float y, float connectingLineWeight, ColorStateList connectingLineColor) {
 
         final Resources res = ctx.getResources();
 
@@ -44,14 +47,34 @@ class ConnectingLine {
                     res.getDisplayMetrics());
         }
 
-        mConnectingLineWeight = connectingLineWeight;
+        mConnectingLineColor = connectingLineColor;
 
         // Initialize the paint, set values
         mPaint = new Paint();
-        mPaint.setColor(connectingLineColor);
-        mPaint.setStrokeWidth(mConnectingLineWeight);
+        mPaint.setColor(connectingLineColor.getDefaultColor());
+        mPaint.setStrokeWidth(connectingLineWeight);
 
         mY = y;
+    }
+
+    void setWeight(float connectingLineWeight) {
+        mPaint.setStrokeWidth(connectingLineWeight);
+    }
+
+    void setColor(ColorStateList colors) {
+        mConnectingLineColor = colors;
+        updateState();
+    }
+
+    void setState(int[] state) {
+        mState = state;
+        updateState();
+    }
+
+    private void updateState() {
+        if (mConnectingLineColor.isStateful()) {
+            mPaint.setColor(mConnectingLineColor.getColorForState(mState, mConnectingLineColor.getDefaultColor()));
+        }
     }
 
     // Package-Private Methods /////////////////////////////////////////////////

@@ -14,6 +14,7 @@
 package com.edmodo.rangebar;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -65,7 +66,7 @@ public class RangeBar extends View {
     private float mBarWeight = DEFAULT_BAR_WEIGHT_PX;
     private int mBarColor = DEFAULT_BAR_COLOR;
     private float mConnectingLineWeight = DEFAULT_CONNECTING_LINE_WEIGHT_DP;
-    private int mConnectingLineColor = DEFAULT_CONNECTING_LINE_COLOR;
+    private ColorStateList mConnectingLineColor = ColorStateList.valueOf(DEFAULT_CONNECTING_LINE_COLOR);
     private int mThumbImageNormal = DEFAULT_THUMB_IMAGE_NORMAL;
 
     private float mThumbRadiusDP = DEFAULT_THUMB_RADIUS_DP;
@@ -84,7 +85,7 @@ public class RangeBar extends View {
     private Bar mBar;
     private ConnectingLine mConnectingLine;
 
-    private RangeBar.OnRangeBarChangeListener mListener;
+    private OnRangeBarChangeListener mListener;
     private int mLeftIndex = 0;
     private int mRightIndex = mTickCount - 1;
     private int mScaledTouchSlop;
@@ -122,7 +123,7 @@ public class RangeBar extends View {
         bundle.putFloat("BAR_WEIGHT", mBarWeight);
         bundle.putInt("BAR_COLOR", mBarColor);
         bundle.putFloat("CONNECTING_LINE_WEIGHT", mConnectingLineWeight);
-        bundle.putInt("CONNECTING_LINE_COLOR", mConnectingLineColor);
+        bundle.putParcelable("CONNECTING_LINE_COLOR", mConnectingLineColor);
 
         bundle.putInt("THUMB_IMAGE_NORMAL", mThumbImageNormal);
 
@@ -150,7 +151,7 @@ public class RangeBar extends View {
             mBarWeight = bundle.getFloat("BAR_WEIGHT");
             mBarColor = bundle.getInt("BAR_COLOR");
             mConnectingLineWeight = bundle.getFloat("CONNECTING_LINE_WEIGHT");
-            mConnectingLineColor = bundle.getInt("CONNECTING_LINE_COLOR");
+            mConnectingLineColor = bundle.getParcelable("CONNECTING_LINE_COLOR");
 
             mThumbImageNormal = bundle.getInt("THUMB_IMAGE_NORMAL");
 
@@ -239,6 +240,7 @@ public class RangeBar extends View {
 
         // Create the line connecting the two thumbs.
         mConnectingLine = new ConnectingLine(ctx, yPos, mConnectingLineWeight, mConnectingLineColor);
+        mConnectingLine.setState(getDrawableState());
 
         mIsMeasured = true;
 
@@ -296,7 +298,7 @@ public class RangeBar extends View {
      * @param listener the RangeBar notification listener; null to remove any
      *            existing listener
      */
-    public void setOnRangeBarChangeListener(RangeBar.OnRangeBarChangeListener listener) {
+    public void setOnRangeBarChangeListener(OnRangeBarChangeListener listener) {
         mListener = listener;
     }
 
@@ -375,7 +377,8 @@ public class RangeBar extends View {
     public void setConnectingLineWeight(float connectingLineWeight) {
 
         mConnectingLineWeight = connectingLineWeight;
-        createConnectingLine();
+        mConnectingLine.setWeight(mConnectingLineWeight);
+        invalidate();
     }
 
     /**
@@ -386,8 +389,21 @@ public class RangeBar extends View {
      */
     public void setConnectingLineColor(int connectingLineColor) {
 
-        mConnectingLineColor = connectingLineColor;
-        createConnectingLine();
+        mConnectingLineColor = ColorStateList.valueOf(connectingLineColor);
+        mConnectingLine.setColor(mConnectingLineColor);
+        invalidate();
+    }
+
+    /**
+     * Set the color selector of the connecting line between the thumbs.
+     *
+     * @param colors stateful color selector
+     */
+    public void setConnectingLineColor(ColorStateList colors) {
+
+        mConnectingLineColor = colors;
+        mConnectingLine.setColor(mConnectingLineColor);
+        invalidate();
     }
 
     /**
@@ -486,6 +502,18 @@ public class RangeBar extends View {
         return mRightIndex;
     }
 
+    @Override
+    public void refreshDrawableState() {
+        super.refreshDrawableState();
+        if (mConnectingLine != null) mConnectingLine.setState(getDrawableState());
+
+        if (mLeftThumb != null && mRightThumb != null) {
+            boolean isEnabled = isEnabled();
+            mLeftThumb.setEnabled(isEnabled);
+            mRightThumb.setEnabled(isEnabled);
+        }
+    }
+
     // Private Methods /////////////////////////////////////////////////////////
 
     /**
@@ -523,14 +551,18 @@ public class RangeBar extends View {
             mBarColor = ta.getColor(R.styleable.RangeBar_barColor, DEFAULT_BAR_COLOR);
             mConnectingLineWeight = ta.getDimension(R.styleable.RangeBar_connectingLineWeight,
                                                     DEFAULT_CONNECTING_LINE_WEIGHT_DP);
-            mConnectingLineColor = ta.getColor(R.styleable.RangeBar_connectingLineColor,
-                                               DEFAULT_CONNECTING_LINE_COLOR);
+
+            ColorStateList csl = ta.getColorStateList(R.styleable.RangeBar_connectingLineColor);
+            if (csl != null) mConnectingLineColor = csl;
+
             mThumbRadiusDP = ta.getDimension(R.styleable.RangeBar_thumbRadius, DEFAULT_THUMB_RADIUS_DP);
             mThumbImageNormal = ta.getResourceId(R.styleable.RangeBar_thumbImage,
                                                  DEFAULT_THUMB_IMAGE_NORMAL);
             mThumbColorNormal = ta.getColor(R.styleable.RangeBar_thumbColorNormal, DEFAULT_THUMB_COLOR_NORMAL);
             mThumbColorPressed = ta.getColor(R.styleable.RangeBar_thumbColorPressed,
                                              DEFAULT_THUMB_COLOR_PRESSED);
+
+            setEnabled(ta.getBoolean(R.styleable.RangeBar_android_enabled, true));
 
         } finally {
 
@@ -553,18 +585,6 @@ public class RangeBar extends View {
                        mTickHeightDP,
                        mBarWeight,
                        mBarColor);
-        invalidate();
-    }
-
-    /**
-     * Creates a new ConnectingLine.
-     */
-    private void createConnectingLine() {
-
-        mConnectingLine = new ConnectingLine(getContext(),
-                                             getYPos(),
-                                             mConnectingLineWeight,
-                                             mConnectingLineColor);
         invalidate();
     }
 
@@ -595,6 +615,8 @@ public class RangeBar extends View {
         // Initialize thumbs to the desired indices
         mLeftThumb.setX(marginLeft + (mLeftIndex / (float) (mTickCount - 1)) * barLength);
         mRightThumb.setX(marginLeft + (mRightIndex / (float) (mTickCount - 1)) * barLength);
+
+        refreshDrawableState();
 
         invalidate();
     }

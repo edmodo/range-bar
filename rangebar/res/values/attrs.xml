@@ -10,6 +10,8 @@
         <attr name="thumbRadius" format="dimension" />
         <attr name="thumbImage" format="reference" />
 
+        <attr name="android:enabled" />
+
         <!-- @deprecated use `thumbImage` to reference individual
              ShapeDrawables that then reference the desired colors. -->
         <attr name="thumbColorNormal" format="reference|color" />

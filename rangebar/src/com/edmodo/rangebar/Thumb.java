@@ -46,9 +46,6 @@ class Thumb {
     private static final int DEFAULT_THUMB_COLOR_NORMAL = 0xff33b5e5;
     private static final int DEFAULT_THUMB_COLOR_PRESSED = 0xff33b5e5;
 
-    private static final int[] STATE_PRESSED = { android.R.attr.state_pressed };
-    private static final int[] STATE_NOT_PRESSED = { -android.R.attr.state_pressed };
-
     // Member Variables ////////////////////////////////////////////////////////
 
     // Radius (in pixels) of the touch area of the thumb.
@@ -69,6 +66,7 @@ class Thumb {
 
     // The current x-position of the thumb in the parent view.
     private float mX;
+    private boolean mIsEnabled = true;
 
     // Constructors ////////////////////////////////////////////////////////////
 
@@ -102,11 +100,11 @@ class Thumb {
 
             ShapeDrawable sd = new ShapeDrawable(new OvalShape());
             sd.getPaint().setColor(thumbColorNormal);
-            sld.addState(STATE_NOT_PRESSED, sd);
+            sld.addState(new int[] { -android.R.attr.state_pressed }, sd);
 
             sd = new ShapeDrawable(new OvalShape());
             sd.getPaint().setColor(thumbColorPressed);
-            sld.addState(STATE_PRESSED, sd);
+            sld.addState(new int[] { android.R.attr.state_pressed }, sd);
 
             mImageNormal = sld;
         }
@@ -140,6 +138,8 @@ class Thumb {
 
         mX = mHalfWidthNormal;
         mY = y;
+
+        updateState();
     }
 
     // Package-Private Methods /////////////////////////////////////////////////
@@ -166,14 +166,26 @@ class Thumb {
 
     void press() {
         mIsPressed = true;
-
-        mImageNormal.setState(STATE_PRESSED);
+        updateState();
     }
 
     void release() {
         mIsPressed = false;
+        updateState();
+    }
 
-        mImageNormal.setState(STATE_NOT_PRESSED);
+    void setEnabled(boolean enabled) {
+        mIsEnabled = enabled;
+        updateState();
+    }
+
+    void updateState() {
+        int state[] = {
+                mIsEnabled ? android.R.attr.state_enabled : -android.R.attr.state_enabled,
+                mIsPressed ? android.R.attr.state_pressed : -android.R.attr.state_pressed
+        };
+
+        mImageNormal.setState(state);
     }
 
     /**
