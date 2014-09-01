@@ -89,6 +89,9 @@ public class RangeBar extends View {
     private int mRightIndex = mTickCount - 1;
     private int mScaledTouchSlop;
 
+    private boolean mIsMeasured = false;
+    private boolean mNotifyOnMeasure = false;
+
     // Constructors ////////////////////////////////////////////////////////////
 
     public RangeBar(Context context) {
@@ -234,20 +237,12 @@ public class RangeBar extends View {
         mLeftThumb.setX(marginLeft + (mLeftIndex / (float) (mTickCount - 1)) * barLength);
         mRightThumb.setX(marginLeft + (mRightIndex / (float) (mTickCount - 1)) * barLength);
 
-        // Set the thumb indices.
-        final int newLeftIndex = mBar.getNearestTickIndex(mLeftThumb);
-        final int newRightIndex = mBar.getNearestTickIndex(mRightThumb);
-
-        // Call the listener.
-        if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex) {
-
-            mLeftIndex = newLeftIndex;
-            mRightIndex = newRightIndex;
-            notifyListener();
-        }
-
         // Create the line connecting the two thumbs.
         mConnectingLine = new ConnectingLine(ctx, yPos, mConnectingLineWeight, mConnectingLineColor);
+
+        mIsMeasured = true;
+
+        evaluateNewIndices();
     }
 
     @Override
@@ -518,7 +513,6 @@ public class RangeBar extends View {
                 mTickCount = tickCount;
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
-                notifyListener();
             } else {
 
                 Log.e(TAG, "tickCount less than 2; invalid tickCount. XML input ignored.");
@@ -748,8 +742,9 @@ public class RangeBar extends View {
         final int newRightIndex = mBar.getNearestTickIndex(mRightThumb);
 
         // If either of the indices have changed, update and call the listener.
-        if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex) {
+        if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex || mNotifyOnMeasure) {
 
+            mNotifyOnMeasure = false;
             mLeftIndex = newLeftIndex;
             mRightIndex = newRightIndex;
             notifyListener();
@@ -762,6 +757,11 @@ public class RangeBar extends View {
      * offsets.
      */
     private void notifyListener() {
+        if (!mIsMeasured) {
+            mNotifyOnMeasure = true;
+            return;
+        }
+
         if (mListener != null) {
             final float nearestTickLeft = mBar.getNearestTickCoordinate(mLeftThumb);
             final float nearestTickRight = mBar.getNearestTickCoordinate(mRightThumb);
