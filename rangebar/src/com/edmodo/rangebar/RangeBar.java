@@ -315,6 +315,38 @@ public class RangeBar extends View {
     }
 
     /**
+     * Set right index of the bar.
+     *
+     * @param rightIndex Integer specifying the right index value.
+     * @throws IllegalArgumentException throws then new value greater than count of ticks.
+     */
+    public void setRightIndex(int rightIndex) throws IllegalArgumentException {
+        if (rightIndex >= mTickCount) {
+            throw  new IllegalArgumentException("The value of the new index greater than count of ticks.");
+        } else {
+            this.mRightIndex = rightIndex;
+            setThumbIndices(mLeftIndex, mRightIndex);
+        }
+    }
+
+    /**
+     * Set left index of the bar.
+     *
+     * @param leftIndex Integer specifying the right index value.
+     */
+    public void setLeftIndex(int leftIndex) {
+        this.mLeftIndex = leftIndex;
+        setThumbIndices(mLeftIndex, mRightIndex);
+    }
+
+    /**
+     * @return Integer count of ticks.
+     */
+    public int getTickCount() {
+        return mTickCount;
+    }
+
+    /**
      * Sets the number of ticks in the RangeBar.
      * 
      * @param tickCount Integer specifying the number of ticks.
