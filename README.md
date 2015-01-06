@@ -34,13 +34,15 @@ Installation
 
 **build.gradle**
 
-	repositories {
-		mavenCentral()
-	}
+```groovy
+repositories {
+    mavenCentral()
+}
 
-	dependencies {
-	  compile 'com.edmodo:rangebar:1.0.0'
-	}
+dependencies {
+    compile 'com.edmodo:rangebar:1.0.0'
+}
+```
 
 License
 =======
