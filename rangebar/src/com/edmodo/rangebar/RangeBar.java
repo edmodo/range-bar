@@ -742,13 +742,13 @@ public class RangeBar extends View {
 			float rightThumbXDistance = Math.abs(mRightThumb.getX() - x);
 
 			if (leftThumbXDistance < rightThumbXDistance) {
-				if(x < mBar.getLeftX())
-                    	            x = mBar.getLeftX();
+				if (x < mBar.getLeftX())
+                    x = mBar.getLeftX();
 				mLeftThumb.setX(x);
 				releaseThumb(mLeftThumb);
 			} else {
-				if(x > mBar.getRightX())
-                    	            x = mBar.getRightX();
+				if (x > mBar.getRightX())
+                    x = mBar.getRightX();
 				mRightThumb.setX(x);
 				releaseThumb(mRightThumb);
 			}
@@ -847,11 +847,11 @@ public class RangeBar extends View {
         if (x < mBar.getLeftX() || x > mBar.getRightX()) {
             if (x < mBar.getLeftX()) {
                 thumb.setX(mBar.getLeftX());
-            }else {
+            } else {
                 thumb.setX(mBar.getRightX());
             }
             invalidate();
-        }else {
+        } else {
             thumb.setX(x);
             invalidate();
         }
