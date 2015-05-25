@@ -1,14 +1,14 @@
 /*
- * Copyright 2013, Edmodo, Inc. 
+ * Copyright 2013, Edmodo, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License.
  * You may obtain a copy of the License in the LICENSE file, or at:
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" 
- * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language 
- * governing permissions and limitations under the License. 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS"
+ * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 
 package com.edmodo.rangebar;
@@ -87,7 +87,7 @@ class Thumb {
           float y,
           int thumbColorNormal,
           int thumbColorPressed,
-          float thumbRadiusDP,
+          float thumbRadiusPX,
           int thumbImageNormal,
           int thumbImagePressed) {
 
@@ -97,9 +97,15 @@ class Thumb {
         mImagePressed = BitmapFactory.decodeResource(res, thumbImagePressed);
 
         // If any of the attributes are set, toggle bitmap off
-        if (thumbRadiusDP == -1 && thumbColorNormal == -1 && thumbColorPressed == -1) {
+        if (thumbRadiusPX == -1 && thumbColorNormal == -1 && thumbColorPressed == -1) {
 
             mUseBitmap = true;
+
+            mHalfWidthNormal = mImageNormal.getWidth() / 2f;
+            mHalfHeightNormal = mImageNormal.getHeight() / 2f;
+
+            mHalfWidthPressed = mImagePressed.getWidth() / 2f;
+            mHalfHeightPressed = mImagePressed.getHeight() / 2f;
 
         } else {
 
@@ -107,14 +113,12 @@ class Thumb {
 
             // If one of the attributes are set, but the others aren't, set the
             // attributes to default
-            if (thumbRadiusDP == -1)
+            if (thumbRadiusPX == -1)
                 mThumbRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                                                            DEFAULT_THUMB_RADIUS_DP,
                                                            res.getDisplayMetrics());
             else
-                mThumbRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                                                           thumbRadiusDP,
-                                                           res.getDisplayMetrics());
+                mThumbRadiusPx = thumbRadiusPX;
 
             if (thumbColorNormal == -1)
                 mThumbColorNormal = DEFAULT_THUMB_COLOR_NORMAL;
@@ -134,17 +138,13 @@ class Thumb {
             mPaintPressed = new Paint();
             mPaintPressed.setColor(mThumbColorPressed);
             mPaintPressed.setAntiAlias(true);
+
+            mHalfHeightPressed = mHalfWidthPressed = mHalfHeightNormal = mHalfWidthNormal = mThumbRadiusPx;
         }
-
-        mHalfWidthNormal = mImageNormal.getWidth() / 2f;
-        mHalfHeightNormal = mImageNormal.getHeight() / 2f;
-
-        mHalfWidthPressed = mImagePressed.getWidth() / 2f;
-        mHalfHeightPressed = mImagePressed.getHeight() / 2f;
 
         // Sets the minimum touchable area, but allows it to expand based on
         // image size
-        int targetRadius = (int) Math.max(MINIMUM_TARGET_RADIUS_DP, thumbRadiusDP);
+        int targetRadius = (int) Math.max(MINIMUM_TARGET_RADIUS_DP, thumbRadiusPX);
 
         mTargetRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                                                     targetRadius,
@@ -156,12 +156,20 @@ class Thumb {
 
     // Package-Private Methods /////////////////////////////////////////////////
 
+    float getWidth() {
+        return mHalfWidthNormal * 2;
+    }
+
     float getHalfWidth() {
         return mHalfWidthNormal;
     }
 
     float getHalfHeight() {
         return mHalfHeightNormal;
+    }
+
+    float getHeight() {
+        return mHalfHeightNormal * 2;
     }
 
     void setX(float x) {
@@ -187,7 +195,7 @@ class Thumb {
     /**
      * Determines if the input coordinate is close enough to this thumb to
      * consider it a press.
-     * 
+     *
      * @param x the x-coordinate of the user touch
      * @param y the y-coordinate of the user touch
      * @return true if the coordinates are within this thumb's target area;
@@ -203,7 +211,7 @@ class Thumb {
 
     /**
      * Draws this thumb on the provided canvas.
-     * 
+     *
      * @param canvas Canvas to draw on; should be the Canvas passed into {#link
      *            View#onDraw()}
      */

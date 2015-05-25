@@ -1,20 +1,7 @@
-
-# built application files
+bin
+gen
 *.apk
-*.ap_
-
-# files for the dex VM
-*.dex
-
-# Java class files
-*.class
-
-# generated files
-bin/
-gen/
-out/
-
-# Local configuration file (sdk path, etc)
+.hg/
 local.properties
 
 # Mac OS X internal files
