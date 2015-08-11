@@ -58,6 +58,8 @@ public class RangeBar extends View {
     private static final int DEFAULT_THUMB_COLOR_NORMAL = -1;
     private static final int DEFAULT_THUMB_COLOR_PRESSED = -1;
 
+    private static final boolean DEFAULT_PRESSABLE_OUTSIDE_THUMB = true;
+
     // Instance variables for all of the customizable attributes
     private int mTickCount = DEFAULT_TICK_COUNT;
     private float mTickHeightDP = DEFAULT_TICK_HEIGHT_DP;
@@ -71,6 +73,8 @@ public class RangeBar extends View {
     private float mThumbRadiusDP = DEFAULT_THUMB_RADIUS_DP;
     private int mThumbColorNormal = DEFAULT_THUMB_COLOR_NORMAL;
     private int mThumbColorPressed = DEFAULT_THUMB_COLOR_PRESSED;
+
+    private boolean mPressableOutsideThumb = DEFAULT_PRESSABLE_OUTSIDE_THUMB;
 
     // setTickCount only resets indices before a thumb has been pressed or a
     // setThumbIndices() is called, to correspond with intended usage
@@ -132,6 +136,8 @@ public class RangeBar extends View {
 
         bundle.putBoolean("FIRST_SET_TICK_COUNT", mFirstSetTickCount);
 
+        bundle.putBoolean("PRESSABLE_OUTSIDE_THUMB", mPressableOutsideThumb);
+
         return bundle;
     }
 
@@ -159,6 +165,8 @@ public class RangeBar extends View {
             mLeftIndex = bundle.getInt("LEFT_INDEX");
             mRightIndex = bundle.getInt("RIGHT_INDEX");
             mFirstSetTickCount = bundle.getBoolean("FIRST_SET_TICK_COUNT");
+
+            mPressableOutsideThumb = bundle.getBoolean("PRESSABLE_OUTSIDE_THUMB");
 
             setThumbIndices(mLeftIndex, mRightIndex);
 
@@ -292,8 +300,12 @@ public class RangeBar extends View {
                 return true;
 
             case MotionEvent.ACTION_MOVE:
-                onActionMove(event.getX());
-                this.getParent().requestDisallowInterceptTouchEvent(true);
+                if (onActionMove(event.getX())) {
+                    // only disallow if the event actually did something, for example dragging the thumb
+                    this.getParent().requestDisallowInterceptTouchEvent(true);
+                } else {
+                    this.getParent().requestDisallowInterceptTouchEvent(false);
+                }
                 return true;
 
             default:
@@ -521,6 +533,15 @@ public class RangeBar extends View {
         return mRightIndex;
     }
 
+    /**
+     * Sets whether the nearest thumb should be selected when pressing on the bar outside thumbs
+     *
+     * @param enabled Boolean specifying whether bar is pressable outside thumbs
+     */
+    public void setPressableOutsideThumb(boolean enabled) {
+        mPressableOutsideThumb = enabled;
+    }
+
     // Private Methods /////////////////////////////////////////////////////////
 
     /**
@@ -573,9 +594,8 @@ public class RangeBar extends View {
             mThumbColorNormal = ta.getColor(R.styleable.RangeBar_thumbColorNormal, DEFAULT_THUMB_COLOR_NORMAL);
             mThumbColorPressed = ta.getColor(R.styleable.RangeBar_thumbColorPressed,
                                              DEFAULT_THUMB_COLOR_PRESSED);
-
+            mPressableOutsideThumb = ta.getBoolean(R.styleable.RangeBar_pressableOutsideThumb, DEFAULT_PRESSABLE_OUTSIDE_THUMB);
         } finally {
-
             ta.recycle();
         }
 
@@ -737,32 +757,33 @@ public class RangeBar extends View {
 			releaseThumb(mRightThumb);
 
 		} else {
+            if (mPressableOutsideThumb) {
+                float leftThumbXDistance = Math.abs(mLeftThumb.getX() - x);
+                float rightThumbXDistance = Math.abs(mRightThumb.getX() - x);
 
-			float leftThumbXDistance = Math.abs(mLeftThumb.getX() - x);
-			float rightThumbXDistance = Math.abs(mRightThumb.getX() - x);
+                if (leftThumbXDistance < rightThumbXDistance) {
+                    mLeftThumb.setX(x);
+                    releaseThumb(mLeftThumb);
+                } else {
+                    mRightThumb.setX(x);
+                    releaseThumb(mRightThumb);
+                }
 
-			if (leftThumbXDistance < rightThumbXDistance) {
-				mLeftThumb.setX(x);
-				releaseThumb(mLeftThumb);
-			} else {
-				mRightThumb.setX(x);
-				releaseThumb(mRightThumb);
-			}
+                // Get the updated nearest tick marks for each thumb.
+                final int newLeftIndex = mBar.getNearestTickIndex(mLeftThumb);
+                final int newRightIndex = mBar.getNearestTickIndex(mRightThumb);
 
-	        // Get the updated nearest tick marks for each thumb.
-	        final int newLeftIndex = mBar.getNearestTickIndex(mLeftThumb);
-	        final int newRightIndex = mBar.getNearestTickIndex(mRightThumb);
+                // If either of the indices have changed, update and call the listener.
+                if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex) {
 
-	        // If either of the indices have changed, update and call the listener.
-	        if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex) {
+                    mLeftIndex = newLeftIndex;
+                    mRightIndex = newRightIndex;
 
-	            mLeftIndex = newLeftIndex;
-	            mRightIndex = newRightIndex;
-
-	            if (mListener != null) {
-	                mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
-	            }
-	        }
+                    if (mListener != null) {
+                        mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
+                    }
+                }
+            }
 		}
 	}
 
@@ -771,13 +792,16 @@ public class RangeBar extends View {
      * 
      * @param x the x-coordinate of the move event
      */
-    private void onActionMove(float x) {
+    private boolean onActionMove(float x) {
 
+        boolean isDragging = false;
         // Move the pressed thumb to the new x-position.
         if (mLeftThumb.isPressed()) {
             moveThumb(mLeftThumb, x);
+            isDragging = true;
         } else if (mRightThumb.isPressed()) {
             moveThumb(mRightThumb, x);
+            isDragging = true;
         }
 
         // If the thumbs have switched order, fix the references.
@@ -801,6 +825,7 @@ public class RangeBar extends View {
                 mListener.onIndexChangeListener(this, mLeftIndex, mRightIndex);
             }
         }
+        return isDragging;
     }
 
     /**
