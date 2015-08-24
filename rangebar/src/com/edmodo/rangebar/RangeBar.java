@@ -521,6 +521,13 @@ public class RangeBar extends View {
         return mRightIndex;
     }
 
+    /**
+     * Sets the mFirstSetTickCount flag.
+     */
+    public void setFirstSetTickCountFlag(boolean flag) {
+        mFirstSetTickCount = flag;
+    }
+
     // Private Methods /////////////////////////////////////////////////////////
 
     /**
