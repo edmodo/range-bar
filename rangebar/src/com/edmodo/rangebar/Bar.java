@@ -125,7 +125,13 @@ class Bar {
      */
     int getNearestTickIndex(Thumb thumb) {
 
-        final int nearestTickIndex = (int) ((thumb.getX() - mLeftX + mTickDistance / 2f) / mTickDistance);
+        int nearestTickIndex = (int) ((thumb.getX() - mLeftX + mTickDistance / 2f) / mTickDistance);
+
+        if (nearestTickIndex < 0) {
+            nearestTickIndex = 0;
+        } else if (nearestTickIndex > mNumSegments) {
+            nearestTickIndex = mNumSegments;
+        }
 
         return nearestTickIndex;
     }
