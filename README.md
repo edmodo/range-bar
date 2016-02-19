@@ -2,7 +2,7 @@ AnimatedRangeBar
 =======
 The AnimatedRangeBar is similar to an enhanced SeekBar widget, though it doesn't make use of the SeekBar. It provides for the selection of a range of values rather than a single value. The selectable range values are discrete values designated by tick marks; the thumb (handle) will snap to the nearest tick mark.
 
-[](https://lh4.googleusercontent.com/-Nuv3lfv7bfg/VrIlmOqGo6I/AAAAAAAACHo/PsXzih4IbZ4/w280-h477-no/afgl.gif)
+![](https://lh5.googleusercontent.com/-ucRFjvgXX_g/VsbkzECFw8I/AAAAAAAACKk/lPcnT9UdajQ/w390-h539-no/arb.gif)
 
 U can check the sample app [here](https://github.com/GIGAMOLE/AnimatedRangeBar/tree/master/RangeBarSample).
 
