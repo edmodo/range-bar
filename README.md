@@ -1,7 +1,21 @@
-RangeBar
+AnimatedRangeBar
 =======
-The RangeBar is similar to an enhanced SeekBar widget, though it doesn't make use of the SeekBar. It provides for the selection of a range of values rather than a single value. The selectable range values are discrete values designated by tick marks; the thumb (handle) will snap to the nearest tick mark.
+The AnimatedRangeBar is similar to an enhanced SeekBar widget, though it doesn't make use of the SeekBar. It provides for the selection of a range of values rather than a single value. The selectable range values are discrete values designated by tick marks; the thumb (handle) will snap to the nearest tick mark.
 
+[](https://lh5.googleusercontent.com/-ucRFjvgXX_g/VsbkzECFw8I/AAAAAAAACKk/lPcnT9UdajQ/w390-h539-no/arb.gif)
+
+U can check the sample app [here](https://github.com/GIGAMOLE/AnimatedRangeBar/tree/master/RangeBarSample).
+
+Download
+------------
+Just fork and download code and be ready to use it.
+
+Android SDK Version
+=========
+AnimatedRangeBar requires a minimum sdk version of 7.
+
+Sample
+========
 Developers can customize the following attributes (both via XML and programmatically):
 
 - bar color
@@ -14,48 +28,34 @@ Developers can customize the following attributes (both via XML and programmatic
 - thumb pressed image
 
 If any of the following attributes are specified, the thumb images will be ignored and be replaced with a circle whose properties can be specified as follows:
+
 - thumb radius
 - thumb normal color
 - thumb pressed color
+- thumb animate
 
 Finally, the following property can be set programmatically, but not via XML:
+
 - thumb indices (the location of the thumbs on the RangeBar)
 
-Supported on API Level 7 and above.
-
+Wiki
+======
 For more information, see the linked Github Wiki page.
 
 https://github.com/edmodo/range-bar/wiki
 
-![ScreenShot](http://i.imgur.com/q85GhRjl.png)
-
-Installation
-=======
-
-**build.gradle**
-
-	repositories {
-		mavenCentral()
-	}
-
-	dependencies {
-	  compile 'com.edmodo:rangebar:1.0.0'
-	}
+Getting Help
+======
+To report a specific problem or feature request, send me an email: gigamole53@gmail.com
 
 License
+======
+Apache 2.0. See LICENSE file for details.
+
+Author
 =======
-Copyright 2013, Edmodo, Inc. 
+Basil Miller - @gigamole
 
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License.
-You may obtain a copy of the License in the LICENSE file, or at:
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-
-Contributions
+Fork
 =======
-
-We'd love for you to participate in the development of our project. Before we can accept your pull request, please sign our Individual Contributor License Agreement. It's a short form that covers our bases and makes sure you're eligible to contribute. Thank you!
-
-http://goo.gl/gfj6Mb
+edmodo/range-bar

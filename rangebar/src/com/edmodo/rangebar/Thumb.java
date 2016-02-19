@@ -13,21 +13,28 @@
 
 package com.edmodo.rangebar;
 
+import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Build;
 import android.util.TypedValue;
+import android.view.animation.Interpolator;
+import android.view.animation.OvershootInterpolator;
 
 /**
  * Represents a thumb in the RangeBar slider. This is the handle for the slider
  * that is pressed and slid.
  */
-class Thumb {
+public class Thumb {
 
     // Private Constants ///////////////////////////////////////////////////////
+    private final static int OPEN_DURATION = 50;
+    private final static int CLOSE_DURATION = 200;
 
     // The radius (in dp) of the touchable area around the thumb. We are basing
     // this value off of the recommended 48dp Rhythm. See:
@@ -81,6 +88,22 @@ class Thumb {
     private int mThumbColorNormal;
     private int mThumbColorPressed;
 
+    private final Interpolator mInterpolator = new OvershootInterpolator();
+    private ValueAnimator mAnimator;
+    private ValueAnimator.AnimatorUpdateListener mInvalidateListener;
+
+    private ValueAnimator.AnimatorUpdateListener mUpdateListener;
+    {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+            mUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
+                @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+                @Override
+                public void onAnimationUpdate(final ValueAnimator animation) {
+                    mX = (Float) animation.getAnimatedValue();
+                }
+            };
+        }
+    }
     // Constructors ////////////////////////////////////////////////////////////
 
     Thumb(Context ctx,
@@ -89,12 +112,14 @@ class Thumb {
           int thumbColorPressed,
           float thumbRadiusDP,
           int thumbImageNormal,
-          int thumbImagePressed) {
+          int thumbImagePressed,
+          final ValueAnimator.AnimatorUpdateListener invalidateListener) {
 
         final Resources res = ctx.getResources();
 
         mImageNormal = BitmapFactory.decodeResource(res, thumbImageNormal);
         mImagePressed = BitmapFactory.decodeResource(res, thumbImagePressed);
+        mInvalidateListener = invalidateListener;
 
         // If any of the attributes are set, toggle bitmap off
         if (thumbRadiusDP == -1 && thumbColorNormal == -1 && thumbColorPressed == -1) {
@@ -182,6 +207,30 @@ class Thumb {
 
     void release() {
         mIsPressed = false;
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void startThumb(final float startX) {
+        if (mAnimator != null && mAnimator.isRunning())
+            mAnimator.cancel();
+        mAnimator = ValueAnimator.ofFloat(mX, startX).setDuration(OPEN_DURATION);
+        mAnimator.removeAllUpdateListeners();
+        mAnimator.setInterpolator(null);
+        mAnimator.addUpdateListener(mUpdateListener);
+        mAnimator.addUpdateListener(mInvalidateListener);
+        mAnimator.start();
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void finishThumb(final float endX) {
+        if (mAnimator != null && mAnimator.isRunning())
+            mAnimator.cancel();
+        mAnimator = ValueAnimator.ofFloat(mX, endX).setDuration(CLOSE_DURATION);
+        mAnimator.removeAllUpdateListeners();
+        mAnimator.setInterpolator(mInterpolator);
+        mAnimator.addUpdateListener(mUpdateListener);
+        mAnimator.addUpdateListener(mInvalidateListener);
+        mAnimator.start();
     }
 
     /**

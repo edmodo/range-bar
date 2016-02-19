@@ -1,19 +1,21 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
     <LinearLayout
         android:id="@+id/mylayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:focusableInTouchMode="true"
         android:orientation="vertical"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        tools:context=".MainActivity" >
+        tools:context=".MainActivity">
 
         <TextView
             android:id="@+id/title"
@@ -21,41 +23,41 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/title"
-            android:textSize="40sp" />
+            android:textSize="40sp"/>
 
         <com.edmodo.rangebar.RangeBar
-            xmlns:custom="http://schemas.android.com/apk/res-auto"
             android:id="@+id/rangebar1"
+            xmlns:custom="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="50dp"
             android:layout_marginTop="50dp"
-            custom:tickCount="7" />
+            custom:tickCount="7"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:paddingLeft="40dp"
-            android:paddingRight="40dp" >
+            android:paddingRight="40dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:baselineAligned="false"
-                android:orientation="horizontal" >
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical" >
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/leftIndex"
                         style="@style/RoboTheme"
                         android:layout_marginTop="0dp"
-                        android:text="@string/leftIndex" />
+                        android:text="@string/leftIndex"/>
 
                     <EditText
                         android:id="@+id/leftIndexValue"
@@ -63,20 +65,20 @@
                         android:layout_marginTop="0dp"
                         android:inputType="number"
                         android:text="@string/leftIndexValue"
-                        android:textSize="35sp" />
+                        android:textSize="35sp"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical" >
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/rightIndex"
                         style="@style/RoboTheme"
                         android:layout_marginTop="0dp"
-                        android:text="@string/rightIndex" />
+                        android:text="@string/rightIndex"/>
 
                     <EditText
                         android:id="@+id/rightIndexValue"
@@ -84,7 +86,7 @@
                         android:layout_marginTop="0dp"
                         android:inputType="number"
                         android:text="@string/rightIndexValue"
-                        android:textSize="35sp" />
+                        android:textSize="35sp"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -97,94 +99,94 @@
                 android:paddingRight="20dp"
                 android:text="@string/refresh"
                 android:textColor="#33B5E5"
-                android:textSize="25sp" />
+                android:textSize="25sp"/>
 
             <TextView
                 android:id="@+id/tickCount"
                 style="@style/RoboTheme"
-                android:text="@string/tickCount" />
+                android:text="@string/tickCount"/>
 
             <SeekBar
                 android:id="@+id/tickCountSeek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:progress="7" />
+                android:progress="7"/>
 
             <TextView
                 android:id="@+id/tickHeight"
                 style="@style/RoboTheme"
-                android:text="@string/tickHeight" />
+                android:text="@string/tickHeight"/>
 
             <SeekBar
                 android:id="@+id/tickHeightSeek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="75"
-                android:progress="24" />
+                android:progress="24"/>
 
             <TextView
                 android:id="@+id/barWeight"
                 style="@style/RoboTheme"
-                android:text="@string/barWeight" />
+                android:text="@string/barWeight"/>
 
             <SeekBar
                 android:id="@+id/barWeightSeek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="8"
-                android:progress="2" />
+                android:progress="2"/>
 
             <TextView
                 android:id="@+id/connectingLineWeight"
                 style="@style/RoboTheme"
-                android:text="@string/connectingLineWeight" />
+                android:text="@string/connectingLineWeight"/>
 
             <SeekBar
                 android:id="@+id/connectingLineWeightSeek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="15"
-                android:progress="4" />
+                android:progress="4"/>
 
             <TextView
                 android:id="@+id/thumbRadius"
                 style="@style/RoboTheme"
-                android:text="@string/thumbRadius" />
+                android:text="@string/thumbRadius"/>
 
             <SeekBar
                 android:id="@+id/thumbRadiusSeek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="30"
-                android:progress="0" />
+                android:progress="0"/>
 
             <Button
                 android:id="@+id/barColor"
                 style="@style/RoboTheme"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/barColor" />
+                android:text="@string/barColor"/>
 
             <Button
                 android:id="@+id/connectingLineColor"
                 style="@style/RoboTheme"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/connectingLineColor" />
+                android:text="@string/connectingLineColor"/>
 
             <Button
                 android:id="@+id/thumbColorNormal"
                 style="@style/RoboTheme"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/thumbColorNormal" />
+                android:text="@string/thumbColorNormal"/>
 
             <Button
                 android:id="@+id/thumbColorPressed"
                 style="@style/RoboTheme"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/thumbColorPressed" />
+                android:text="@string/thumbColorPressed"/>
 
             <Button
                 android:id="@+id/resetThumbColors"
@@ -192,7 +194,7 @@
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/resetThumbColors"
-                android:textColor="@android:color/holo_red_light" />
+                android:textColor="@android:color/holo_red_light"/>
         </LinearLayout>
     </LinearLayout>
 

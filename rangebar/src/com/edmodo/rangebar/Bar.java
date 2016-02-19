@@ -102,12 +102,6 @@ class Bar {
         return mRightX;
     }
 
-    /**
-     * Gets the x-coordinate of the nearest tick to the given x-coordinate.
-     * 
-     * @param x the x-coordinate to find the nearest tick for
-     * @return the x-coordinate of the nearest tick
-     */
     float getNearestTickCoordinate(Thumb thumb) {
 
         final int nearestTickIndex = getNearestTickIndex(thumb);
@@ -116,6 +110,16 @@ class Bar {
 
         return nearestTickCoordinate;
     }
+
+    float getNearestTickCoordinate(final float x) {
+
+        final int nearestTickIndex = getNearestTickIndex(x);
+
+        final float nearestTickCoordinate = mLeftX + (nearestTickIndex * mTickDistance);
+
+        return nearestTickCoordinate;
+    }
+
 
     /**
      * Gets the zero-based index of the nearest tick to the given thumb.
@@ -126,6 +130,13 @@ class Bar {
     int getNearestTickIndex(Thumb thumb) {
 
         final int nearestTickIndex = (int) ((thumb.getX() - mLeftX + mTickDistance / 2f) / mTickDistance);
+
+        return nearestTickIndex;
+    }
+
+    int getNearestTickIndex(final float x) {
+
+        final int nearestTickIndex = (int) ((x - mLeftX + mTickDistance / 2f) / mTickDistance);
 
         return nearestTickIndex;
     }
