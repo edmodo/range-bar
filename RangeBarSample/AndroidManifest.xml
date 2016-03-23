@@ -14,8 +14,17 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Holo" >
         <activity
-            android:name="com.example.rangebarsample.MainActivity"
+            android:name=".HorizontalRatingBarActivity"
             android:label="@string/app_name" >
+        </activity>
+
+        <activity
+            android:name=".VerticalRatingBarActivity"
+            android:label="@string/app_name" >
+        </activity>
+
+
+        <activity android:name=".BarOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

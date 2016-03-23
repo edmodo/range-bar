@@ -156,10 +156,19 @@ class Bar {
         // Loop through and draw each tick (except final tick).
         for (int i = 0; i < mNumSegments; i++) {
             final float x = i * mTickDistance + mLeftX;
-            canvas.drawLine(x, mTickStartY, x, mTickEndY, mPaint);
+            float tickStartY = 0; float tickEndY = 0;
+            if (i == 0 ){
+                tickStartY = mTickStartY - 40;
+                tickEndY = mTickEndY + 40;
+            }else{
+                tickStartY = mTickStartY;
+                tickEndY = mTickEndY;
+            }
+
+            canvas.drawLine(x, tickStartY, x, tickEndY, mPaint);
         }
         // Draw final tick. We draw the final tick outside the loop to avoid any
         // rounding discrepancies.
-        canvas.drawLine(mRightX, mTickStartY, mRightX, mTickEndY, mPaint);
+        canvas.drawLine(mRightX, mTickStartY -40, mRightX, mTickEndY + 40, mPaint);
     }
 }
