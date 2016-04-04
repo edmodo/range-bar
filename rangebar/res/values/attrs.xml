@@ -12,6 +12,8 @@
         <attr name="thumbImagePressed" format="reference" />
         <attr name="thumbColorNormal" format="reference|color"/>
         <attr name="thumbColorPressed" format="reference|color"/>
+        <attr name="orientation" format="integer" />
+        <attr name="tickMarkStep" format="integer" />
     </declare-styleable>
 
 </resources>

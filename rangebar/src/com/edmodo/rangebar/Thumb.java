@@ -22,7 +22,7 @@ import android.graphics.Paint;
 import android.util.TypedValue;
 
 /**
- * Represents a thumb in the RangeBar slider. This is the handle for the slider
+ * Representds a thumb in the RangeBar slier. This is the handle for the slider
  * that is pressed and slid.
  */
 class Thumb {
@@ -62,7 +62,7 @@ class Thumb {
     private boolean mIsPressed = false;
 
     // The y-position of the thumb in the parent view. This should not change.
-    private final float mY;
+    private float mY;
 
     // The current x-position of the thumb in the parent view.
     private float mX;
@@ -168,8 +168,14 @@ class Thumb {
         mX = x;
     }
 
+    void setY(float y) { mY = y; }
+
     float getX() {
         return mX;
+    }
+
+    float getY(){
+        return mY;
     }
 
     boolean isPressed() {
@@ -201,6 +207,9 @@ class Thumb {
         return false;
     }
 
+    boolean verticalIsInTargetZone(){
+        return true;
+    }
     /**
      * Draws this thumb on the provided canvas.
      * 

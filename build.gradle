@@ -1,15 +1,26 @@
-buildscript {
-
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        // Plug-in release notes: http://tools.android.com/tech-docs/new-build-system
-        classpath 'com.android.tools.build:gradle:0.11.+'
-    }
-}
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 task wrapper(type: Wrapper) {
-    // See latest Gradle version: http://www.gradle.org/downloads
-    gradleVersion = '1.12'
+    gradleVersion = '2.2'
 }
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.1.0'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        maven { url "http://dl.bintray.com/populov/maven" }
+        jcenter()
+    }
+}
+
+

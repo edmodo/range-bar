@@ -2,4 +2,5 @@
 <resources>
     <color name="defaultTextColor">#ffffff</color>
     <color name="holoBlue"> #33b5e5 </color>
+    <color name="seekbar_progress_color">#1F809C</color>
 </resources>
