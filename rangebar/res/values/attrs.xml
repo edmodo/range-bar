@@ -12,6 +12,7 @@
         <attr name="thumbImagePressed" format="reference" />
         <attr name="thumbColorNormal" format="reference|color"/>
         <attr name="thumbColorPressed" format="reference|color"/>
+        <attr name="thumbAnimate" format="boolean"/>
     </declare-styleable>
 
 </resources>
