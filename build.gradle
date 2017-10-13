@@ -1,15 +1,38 @@
 buildscript {
-
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
-        // Plug-in release notes: http://tools.android.com/tech-docs/new-build-system
-        classpath 'com.android.tools.build:gradle:0.11.+'
+        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1"
+    }
+}
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+    id "com.github.dcendents.android-maven" version "1.5"
+}
+allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+        maven {
+            url  "https://dl.bintray.com/krazykira/maven"
+        }
     }
 }
 
-task wrapper(type: Wrapper) {
-    // See latest Gradle version: http://www.gradle.org/downloads
-    gradleVersion = '1.12'
+afterEvaluate { project ->
+    def propsFile = rootProject.file('../keystore.properties')
+    def configName = 'release'
+
+    if (propsFile.exists() && android.signingConfigs.hasProperty(configName)) {
+        def props = new Properties()
+        props.load(new FileInputStream(propsFile))
+        android.signingConfigs[configName].storeFile = file(props['storeFile'])
+        android.signingConfigs[configName].storePassword = props['storePassword']
+        android.signingConfigs[configName].keyAlias = props['keyAlias']
+        android.signingConfigs[configName].keyPassword = props['keyPassword']
+    }
 }
