@@ -1,8 +1,9 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
+apply plugin: 'com.github.dcendents.android-maven'
 
 version = "1.0.0"
-group = "com.edmodo"
+group = "com.github.zigbang"
 
 android {
 

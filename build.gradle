@@ -4,9 +4,11 @@ buildscript {
         mavenCentral()
         google()
         jcenter()
+        maven { url "https://jitpack.io" }
     }
     dependencies {
         // Plug-in release notes: http://tools.android.com/tech-docs/new-build-system
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
         classpath 'com.android.tools.build:gradle:3.0.0'
     }
 }
