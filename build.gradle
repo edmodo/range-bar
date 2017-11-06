@@ -2,14 +2,18 @@ buildscript {
 
     repositories {
         mavenCentral()
+        google()
+        jcenter()
+        maven { url "https://jitpack.io" }
     }
     dependencies {
         // Plug-in release notes: http://tools.android.com/tech-docs/new-build-system
-        classpath 'com.android.tools.build:gradle:0.11.+'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+        classpath 'com.android.tools.build:gradle:3.0.0'
     }
 }
 
 task wrapper(type: Wrapper) {
     // See latest Gradle version: http://www.gradle.org/downloads
-    gradleVersion = '1.12'
+    gradleVersion = '4.1'
 }
