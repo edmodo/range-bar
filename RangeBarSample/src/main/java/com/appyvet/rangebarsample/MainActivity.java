@@ -8,13 +8,8 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.SeekBar;
+import android.widget.*;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.TextView;
-
 import com.appyvet.materialrangebar.RangeBar;
 import com.appyvet.rangebarsample.colorpicker.ColorPickerDialog;
 import com.appyvet.rangebarsample.colorpicker.Utils;
@@ -84,7 +79,15 @@ public class MainActivity extends Activity implements
         final TextView tickTopLabelsButton = (TextView) findViewById(R.id.toggleTickTopLabels);
         final TextView tickLabelColor = (TextView) findViewById(R.id.tickLabelColor);
         final TextView tickLabelSelectedColor = (TextView) findViewById(R.id.tickLabelSelectColor);
+        final Button reset = (Button) findViewById(R.id.reset_button);
 
+        reset.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                rangebar.reset();
+            }
+        });
         //Sets the buttons to bold.
 //        barColor.setTypeface(font, Typeface.BOLD);
 //        connectingLineColor.setTypeface(font, Typeface.BOLD);

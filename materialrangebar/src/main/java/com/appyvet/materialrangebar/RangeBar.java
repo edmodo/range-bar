@@ -571,6 +571,23 @@ public class RangeBar extends View {
         this.drawTicks = drawTicks;
     }
 
+    public void reset() {
+        int tickCount = (int) ((mTickEnd - 0) / mTickInterval) + 1;
+        if (isValidTickCount(tickCount)) {
+            mTickCount = tickCount;
+            mTickStart = 0;
+            mLeftIndex = 0;
+            mRightIndex = mTickCount - 1;
+            setRangePinsByValue(Float.valueOf(getPinValue(mLeftIndex)), Float.valueOf(getPinValue(mRightIndex)));
+            if (mListener != null) {
+                mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+                        getPinValue(mLeftIndex),
+                        getPinValue(mRightIndex));
+            }
+        }
+
+    }
+
     /**
      * Sets the start tick in the RangeBar.
      *
