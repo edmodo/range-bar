@@ -90,9 +90,6 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
         setContentView(R.layout.activity_main);
 
         // Sets fonts for all
-        Typeface font = Typeface.createFromAsset(getAssets(), "Roboto-Thin.ttf");
-        ViewGroup root = (ViewGroup) findViewById(R.id.mylayout);
-        setFont(root, font);
 
         // Gets the buttons references for the buttons
         final Button barColor = (Button) findViewById(R.id.barColor);
@@ -102,14 +99,6 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
         final Button resetThumbColors = (Button) findViewById(R.id.resetThumbColors);
         final Button refreshButton = (Button) findViewById(R.id.refresh);
         
-        //Sets the buttons to bold.
-        refreshButton.setTypeface(font,Typeface.BOLD);
-        barColor.setTypeface(font,Typeface.BOLD);
-        connectingLineColor.setTypeface(font,Typeface.BOLD);
-        thumbColorNormal.setTypeface(font,Typeface.BOLD);
-        thumbColorPressed.setTypeface(font,Typeface.BOLD);
-        resetThumbColors.setTypeface(font,Typeface.BOLD);
-
         // Sets initial colors for the Color buttons
         barColor.setTextColor(DEFAULT_BAR_COLOR);
         connectingLineColor.setTextColor(DEFAULT_CONNECTING_LINE_COLOR);
