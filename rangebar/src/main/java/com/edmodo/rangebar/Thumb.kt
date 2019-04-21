@@ -14,8 +14,6 @@
 package com.edmodo.rangebar
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.TypedValue
@@ -25,14 +23,10 @@ import android.util.TypedValue
  * that is pressed and slid.
  */
 internal class Thumb(ctx: Context, private val mY: Float, thumbColorNormal: Int, thumbColorPressed: Int,
-                     thumbRadiusDP: Float, thumbImageNormal: Int, thumbImagePressed: Int) {
+                     thumbRadiusDP: Float) {
 
     // Radius (in pixels) of the touch area of the thumb.
     private val mTargetRadiusPx: Float
-
-    // The normal and pressed images to display for the thumbs.
-    private val mImageNormal: Bitmap
-    private val mImagePressed: Bitmap
 
     // Variables to store half the width/height for easier calculation.
 
@@ -56,9 +50,6 @@ internal class Thumb(ctx: Context, private val mY: Float, thumbColorNormal: Int,
     // Radius of the new thumb if selected
     private var mThumbRadiusPx: Float = 0.toFloat()
 
-    // Toggle to select bitmap thumbImage or not
-    private var mUseBitmap: Boolean = false
-
     // Colors of the thumbs if they are to be drawn
     private var mThumbColorNormal: Int = 0
     private var mThumbColorPressed: Int = 0
@@ -67,54 +58,41 @@ internal class Thumb(ctx: Context, private val mY: Float, thumbColorNormal: Int,
 
         val res = ctx.resources
 
-        mImageNormal = BitmapFactory.decodeResource(res, thumbImageNormal)
-        mImagePressed = BitmapFactory.decodeResource(res, thumbImagePressed)
+        // If one of the attributes are set, but the others aren't, set the
+        // attributes to default
+        if (thumbRadiusDP == -1f)
+            mThumbRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    DEFAULT_THUMB_RADIUS_DP,
+                    res.displayMetrics)
+        else
+            mThumbRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    thumbRadiusDP,
+                    res.displayMetrics)
 
-        // If any of the attributes are set, toggle bitmap off
-        if (thumbRadiusDP == -1f && thumbColorNormal == -1 && thumbColorPressed == -1) {
+        if (thumbColorNormal == -1)
+            mThumbColorNormal = DEFAULT_THUMB_COLOR_NORMAL
+        else
+            mThumbColorNormal = thumbColorNormal
 
-            mUseBitmap = true
+        if (thumbColorPressed == -1)
+            mThumbColorPressed = DEFAULT_THUMB_COLOR_PRESSED
+        else
+            mThumbColorPressed = thumbColorPressed
 
-        } else {
+        // Creates the paint and sets the Paint values
+        mPaintNormal = Paint()
+        mPaintNormal!!.color = mThumbColorNormal
+        mPaintNormal!!.isAntiAlias = true
 
-            mUseBitmap = false
+        mPaintPressed = Paint()
+        mPaintPressed!!.color = mThumbColorPressed
+        mPaintPressed!!.isAntiAlias = true
 
-            // If one of the attributes are set, but the others aren't, set the
-            // attributes to default
-            if (thumbRadiusDP == -1f)
-                mThumbRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                        DEFAULT_THUMB_RADIUS_DP,
-                        res.displayMetrics)
-            else
-                mThumbRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                        thumbRadiusDP,
-                        res.displayMetrics)
+        halfWidth = mThumbRadiusPx
+        halfHeight = mThumbRadiusPx
 
-            if (thumbColorNormal == -1)
-                mThumbColorNormal = DEFAULT_THUMB_COLOR_NORMAL
-            else
-                mThumbColorNormal = thumbColorNormal
-
-            if (thumbColorPressed == -1)
-                mThumbColorPressed = DEFAULT_THUMB_COLOR_PRESSED
-            else
-                mThumbColorPressed = thumbColorPressed
-
-            // Creates the paint and sets the Paint values
-            mPaintNormal = Paint()
-            mPaintNormal!!.color = mThumbColorNormal
-            mPaintNormal!!.isAntiAlias = true
-
-            mPaintPressed = Paint()
-            mPaintPressed!!.color = mThumbColorPressed
-            mPaintPressed!!.isAntiAlias = true
-        }
-
-        halfWidth = mImageNormal.width / 2f
-        halfHeight = mImageNormal.height / 2f
-
-        mHalfWidthPressed = mImagePressed.width / 2f
-        mHalfHeightPressed = mImagePressed.height / 2f
+        mHalfWidthPressed = mThumbRadiusPx
+        mHalfHeightPressed = mThumbRadiusPx
 
         // Sets the minimum touchable area, but allows it to expand based on
         // image size
@@ -152,35 +130,14 @@ internal class Thumb(ctx: Context, private val mY: Float, thumbColorNormal: Int,
      */
     fun draw(canvas: Canvas) {
 
-        // If a bitmap is to be printed. Determined by thumbRadius attribute.
-        if (mUseBitmap) {
-
-            val bitmap = if (isPressed) mImagePressed else mImageNormal
-
-            if (isPressed) {
-                val topPressed = mY - mHalfHeightPressed
-                val leftPressed = x - mHalfWidthPressed
-                canvas.drawBitmap(bitmap, leftPressed, topPressed, null)
-            } else {
-                val topNormal = mY - halfHeight
-                val leftNormal = x - halfWidth
-                canvas.drawBitmap(bitmap, leftNormal, topNormal, null)
-            }
-
-        } else {
-
-            // Otherwise use a circle to display.
-            if (isPressed)
-                canvas.drawCircle(x, mY, mThumbRadiusPx, mPaintPressed!!)
-            else
-                canvas.drawCircle(x, mY, mThumbRadiusPx, mPaintNormal!!)
-        }
+        // Otherwise use a circle to display.
+        if (isPressed)
+            canvas.drawCircle(x, mY, mThumbRadiusPx, mPaintPressed!!)
+        else
+            canvas.drawCircle(x, mY, mThumbRadiusPx, mPaintNormal!!)
     }
 
     companion object {
-
-        // Private Constants ///////////////////////////////////////////////////////
-
         // The radius (in dp) of the touchable area around the thumb. We are basing
         // this value off of the recommended 48dp Rhythm. See:
         // http://developer.android.com/design/style/metrics-grids.html#48dp-rhythm

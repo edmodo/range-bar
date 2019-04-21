@@ -1,6 +1,10 @@
 <resources>
 
-    <declare-styleable name="RangeBar">
+    <declare-styleable name="Slider">
+        <attr name="minValue" format="integer"/>
+        <attr name="maxValue" format="integer"/>
+        <attr name="currentLeftValue" format="integer"/>
+        <attr name="currentRightValue" format="integer"/>
         <attr name="tickCount" format="integer" />
         <attr name="tickHeight" format="dimension" />
         <attr name="barWeight" format="dimension" />

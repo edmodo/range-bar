@@ -23,13 +23,14 @@
             android:text="@string/title"
             android:textSize="40sp" />
 
-        <com.edmodo.rangebar.RangeBar
+        <com.edmodo.rangebar.Slider
             xmlns:custom="http://schemas.android.com/apk/res-auto"
             android:id="@+id/rangebar1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="50dp"
             android:layout_marginTop="50dp"
+            custom:thumbRadius="6dp"
             custom:tickCount="7" />
 
         <LinearLayout

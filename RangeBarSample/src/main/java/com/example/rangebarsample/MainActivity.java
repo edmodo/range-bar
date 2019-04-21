@@ -4,11 +4,9 @@ package com.example.rangebarsample;
 import android.app.Activity;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,7 +14,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-import com.edmodo.rangebar.RangeBar;
+import com.edmodo.rangebar.Slider;
 
 public class MainActivity extends Activity implements ColorPickerDialog.OnColorChangedListener {
 
@@ -38,7 +36,7 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
     private int mThumbColorPressed = DEFAULT_THUMB_COLOR_PRESSED;
 
     // Initializes the RangeBar in the application
-    private RangeBar rangebar;
+    private Slider rangebar;
 
     // Saves the state upon rotating the screen/restarting the activity
     @Override
@@ -67,7 +65,7 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
         colorChanged(Component.THUMB_COLOR_PRESSED, mThumbColorPressed);
 
         // Gets the RangeBar
-        rangebar = (RangeBar) findViewById(R.id.rangebar1);
+        rangebar = (Slider) findViewById(R.id.rangebar1);
 
         // Gets the index value TextViews
         final TextView leftIndexValue = (TextView) findViewById(R.id.leftIndexValue);
@@ -106,7 +104,7 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
         thumbColorPressed.setTextColor(HOLO_BLUE);
 
         // Gets the RangeBar
-        rangebar = (RangeBar) findViewById(R.id.rangebar1);
+        rangebar = (Slider) findViewById(R.id.rangebar1);
 
         // Setting Index Values -------------------------------
 
@@ -115,9 +113,9 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
         final EditText rightIndexValue = (EditText) findViewById(R.id.rightIndexValue);
 
         // Sets the display values of the indices
-        rangebar.setOnRangeBarChangeListener(new RangeBar.OnRangeBarChangeListener() {
+        rangebar.setOnRangeBarChangeListener(new Slider.OnSliderChangeListener() {
             @Override
-            public void onIndexChangeListener(RangeBar rangeBar, int leftThumbIndex, int rightThumbIndex) {
+            public void onIndexChangeListener(Slider slider, int leftThumbIndex, int rightThumbIndex) {
 
                 leftIndexValue.setText("" + leftThumbIndex);
                 rightIndexValue.setText("" + rightThumbIndex);
@@ -176,7 +174,6 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
         tickHeightSeek.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar tickHeightSeek, int progress, boolean fromUser) {
-                rangebar.setTickHeight(progress);
                 tickHeight.setText("tickHeight = " + progress);
             }
 

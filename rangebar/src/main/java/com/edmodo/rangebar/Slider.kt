@@ -32,20 +32,17 @@ import android.view.View
  *
  *
  * Clients of the RangeBar can attach a
- * [RangeBar.OnRangeBarChangeListener] to be notified when the thumbs have
+ * [Slider.OnSliderChangeListener] to be notified when the thumbs have
  * been moved.
  */
-class RangeBar : View {
+class Slider : View {
 
     // Instance variables for all of the customizable attributes
     private var mTickCount = DEFAULT_TICK_COUNT
-    private var mTickHeightDP = DEFAULT_TICK_HEIGHT_DP
     private var mBarWeight = DEFAULT_BAR_WEIGHT_PX
     private var mBarColor = DEFAULT_BAR_COLOR
     private var mConnectingLineWeight = DEFAULT_CONNECTING_LINE_WEIGHT_PX
     private var mConnectingLineColor = DEFAULT_CONNECTING_LINE_COLOR
-    private var mThumbImageNormal = DEFAULT_THUMB_IMAGE_NORMAL
-    private var mThumbImagePressed = DEFAULT_THUMB_IMAGE_PRESSED
 
     private var mThumbRadiusDP = DEFAULT_THUMB_RADIUS_DP
     private var mThumbColorNormal = DEFAULT_THUMB_COLOR_NORMAL
@@ -63,7 +60,7 @@ class RangeBar : View {
     private var mBar: Bar? = null
     private var mConnectingLine: ConnectingLine? = null
 
-    private var mListener: RangeBar.OnRangeBarChangeListener? = null
+    private var mListener: Slider.OnSliderChangeListener? = null
     /**
      * Gets the index of the left-most thumb.
      *
@@ -127,14 +124,10 @@ class RangeBar : View {
         bundle.putParcelable("instanceState", super.onSaveInstanceState())
 
         bundle.putInt("TICK_COUNT", mTickCount)
-        bundle.putFloat("TICK_HEIGHT_DP", mTickHeightDP)
         bundle.putFloat("BAR_WEIGHT", mBarWeight)
         bundle.putInt("BAR_COLOR", mBarColor)
         bundle.putFloat("CONNECTING_LINE_WEIGHT", mConnectingLineWeight)
         bundle.putInt("CONNECTING_LINE_COLOR", mConnectingLineColor)
-
-        bundle.putInt("THUMB_IMAGE_NORMAL", mThumbImageNormal)
-        bundle.putInt("THUMB_IMAGE_PRESSED", mThumbImagePressed)
 
         bundle.putFloat("THUMB_RADIUS_DP", mThumbRadiusDP)
         bundle.putInt("THUMB_COLOR_NORMAL", mThumbColorNormal)
@@ -153,14 +146,10 @@ class RangeBar : View {
         if (state is Bundle) {
 
             mTickCount = state.getInt("TICK_COUNT")
-            mTickHeightDP = state.getFloat("TICK_HEIGHT_DP")
             mBarWeight = state.getFloat("BAR_WEIGHT")
             mBarColor = state.getInt("BAR_COLOR")
             mConnectingLineWeight = state.getFloat("CONNECTING_LINE_WEIGHT")
             mConnectingLineColor = state.getInt("CONNECTING_LINE_COLOR")
-
-            mThumbImageNormal = state.getInt("THUMB_IMAGE_NORMAL")
-            mThumbImagePressed = state.getInt("THUMB_IMAGE_PRESSED")
 
             mThumbRadiusDP = state.getFloat("THUMB_RADIUS_DP")
             mThumbColorNormal = state.getInt("THUMB_COLOR_NORMAL")
@@ -226,21 +215,17 @@ class RangeBar : View {
                 yPos,
                 mThumbColorNormal,
                 mThumbColorPressed,
-                mThumbRadiusDP,
-                mThumbImageNormal,
-                mThumbImagePressed)
+                mThumbRadiusDP)
         mRightThumb = Thumb(ctx,
                 yPos,
                 mThumbColorNormal,
                 mThumbColorPressed,
-                mThumbRadiusDP,
-                mThumbImageNormal,
-                mThumbImagePressed)
+                mThumbRadiusDP)
 
         // Create the underlying bar.
         val marginLeft = mLeftThumb.halfWidth
         val barLength = w - 2 * marginLeft
-        mBar = Bar(ctx, marginLeft, yPos, barLength, mTickCount, mTickHeightDP, mBarWeight, mBarColor)
+        mBar = Bar(marginLeft, yPos, barLength, mTickCount, mBarWeight, mBarColor)
 
         // Initialize thumbs to the desired indices
         mLeftThumb.x = marginLeft + leftIndex / (mTickCount - 1).toFloat() * barLength
@@ -307,8 +292,6 @@ class RangeBar : View {
         }
     }
 
-    // Public Methods //////////////////////////////////////////////////////////
-
     /**
      * Sets a listener to receive notifications of changes to the RangeBar. This
      * will overwrite any existing set listeners.
@@ -316,7 +299,7 @@ class RangeBar : View {
      * @param listener the RangeBar notification listener; null to remove any
      * existing listener
      */
-    fun setOnRangeBarChangeListener(listener: RangeBar.OnRangeBarChangeListener) {
+    fun setOnRangeBarChangeListener(listener: Slider.OnSliderChangeListener) {
         mListener = listener
     }
 
@@ -357,24 +340,12 @@ class RangeBar : View {
     }
 
     /**
-     * Sets the height of the ticks in the range bar.
-     *
-     * @param tickHeight Float specifying the height of each tick mark in dp.
-     */
-    fun setTickHeight(tickHeight: Float) {
-
-        mTickHeightDP = tickHeight
-        createBar()
-    }
-
-    /**
      * Set the weight of the bar line and the tick lines in the range bar.
      *
      * @param barWeight Float specifying the weight of the bar and tick lines in
      * px.
      */
     fun setBarWeight(barWeight: Float) {
-
         mBarWeight = barWeight
         createBar()
     }
@@ -385,7 +356,6 @@ class RangeBar : View {
      * @param barColor Integer specifying the color of the bar line.
      */
     fun setBarColor(barColor: Int) {
-
         mBarColor = barColor
         createBar()
     }
@@ -397,7 +367,6 @@ class RangeBar : View {
      * line.
      */
     fun setConnectingLineWeight(connectingLineWeight: Float) {
-
         mConnectingLineWeight = connectingLineWeight
         createConnectingLine()
     }
@@ -409,7 +378,6 @@ class RangeBar : View {
      * line.
      */
     fun setConnectingLineColor(connectingLineColor: Int) {
-
         mConnectingLineColor = connectingLineColor
         createConnectingLine()
     }
@@ -421,30 +389,7 @@ class RangeBar : View {
      * @param thumbRadius Float specifying the radius of the thumbs to be drawn.
      */
     fun setThumbRadius(thumbRadius: Float) {
-
         mThumbRadiusDP = thumbRadius
-        createThumbs()
-    }
-
-    /**
-     * Sets the normal thumb picture by taking in a reference ID to an image.
-     *
-     * @param thumbImageNormalID Integer specifying the resource ID of the image to
-     * be drawn as the normal thumb.
-     */
-    fun setThumbImageNormal(thumbImageNormalID: Int) {
-        mThumbImageNormal = thumbImageNormalID
-        createThumbs()
-    }
-
-    /**
-     * Sets the pressed thumb picture by taking in a reference ID to an image.
-     *
-     * @param thumbImagePressedID Integer specifying the resource ID of the image to
-     * be drawn as the pressed thumb.
-     */
-    fun setThumbImagePressed(thumbImagePressedID: Int) {
-        mThumbImagePressed = thumbImagePressedID
         createThumbs()
     }
 
@@ -514,13 +459,13 @@ class RangeBar : View {
      * @return none
      */
     private fun rangeBarInit(context: Context, attrs: AttributeSet) {
-        val ta = context.obtainStyledAttributes(attrs, R.styleable.RangeBar, 0, 0)
+        val ta = context.obtainStyledAttributes(attrs, R.styleable.Slider, 0, 0)
 
         try {
 
             // Sets the values of the user-defined attributes based on the XML
             // attributes.
-            val tickCount = ta.getInteger(R.styleable.RangeBar_tickCount, DEFAULT_TICK_COUNT)
+            val tickCount = ta.getInteger(R.styleable.Slider_tickCount, DEFAULT_TICK_COUNT)
 
             if (isValidTickCount(tickCount)) {
 
@@ -539,21 +484,13 @@ class RangeBar : View {
                 Log.e(TAG, "tickCount less than 2; invalid tickCount. XML input ignored.")
             }
 
-            mTickHeightDP = ta.getDimension(R.styleable.RangeBar_tickHeight, DEFAULT_TICK_HEIGHT_DP)
-            mBarWeight = ta.getDimension(R.styleable.RangeBar_barWeight, DEFAULT_BAR_WEIGHT_PX)
-            mBarColor = ta.getColor(R.styleable.RangeBar_barColor, DEFAULT_BAR_COLOR)
-            mConnectingLineWeight = ta.getDimension(R.styleable.RangeBar_connectingLineWeight,
-                    DEFAULT_CONNECTING_LINE_WEIGHT_PX)
-            mConnectingLineColor = ta.getColor(R.styleable.RangeBar_connectingLineColor,
-                    DEFAULT_CONNECTING_LINE_COLOR)
-            mThumbRadiusDP = ta.getDimension(R.styleable.RangeBar_thumbRadius, DEFAULT_THUMB_RADIUS_DP)
-            mThumbImageNormal = ta.getResourceId(R.styleable.RangeBar_thumbImageNormal,
-                    DEFAULT_THUMB_IMAGE_NORMAL)
-            mThumbImagePressed = ta.getResourceId(R.styleable.RangeBar_thumbImagePressed,
-                    DEFAULT_THUMB_IMAGE_PRESSED)
-            mThumbColorNormal = ta.getColor(R.styleable.RangeBar_thumbColorNormal, DEFAULT_THUMB_COLOR_NORMAL)
-            mThumbColorPressed = ta.getColor(R.styleable.RangeBar_thumbColorPressed,
-                    DEFAULT_THUMB_COLOR_PRESSED)
+            mBarWeight = ta.getDimension(R.styleable.Slider_barWeight, DEFAULT_BAR_WEIGHT_PX)
+            mBarColor = ta.getColor(R.styleable.Slider_barColor, DEFAULT_BAR_COLOR)
+            mConnectingLineWeight = ta.getDimension(R.styleable.Slider_connectingLineWeight, DEFAULT_CONNECTING_LINE_WEIGHT_PX)
+            mConnectingLineColor = ta.getColor(R.styleable.Slider_connectingLineColor, DEFAULT_CONNECTING_LINE_COLOR)
+            mThumbRadiusDP = ta.getDimension(R.styleable.Slider_thumbRadius, DEFAULT_THUMB_RADIUS_DP)
+            mThumbColorNormal = ta.getColor(R.styleable.Slider_thumbColorNormal, DEFAULT_THUMB_COLOR_NORMAL)
+            mThumbColorPressed = ta.getColor(R.styleable.Slider_thumbColorPressed, DEFAULT_THUMB_COLOR_PRESSED)
 
         } finally {
 
@@ -569,12 +506,10 @@ class RangeBar : View {
      */
     private fun createBar() {
 
-        mBar = Bar(context,
-                marginLeft,
+        mBar = Bar(marginLeft,
                 yPos,
                 barLength,
                 mTickCount,
-                mTickHeightDP,
                 mBarWeight,
                 mBarColor)
         invalidate()
@@ -608,16 +543,12 @@ class RangeBar : View {
                 yPos,
                 mThumbColorNormal,
                 mThumbColorPressed,
-                mThumbRadiusDP,
-                mThumbImageNormal,
-                mThumbImagePressed)
+                mThumbRadiusDP)
         mRightThumb = Thumb(ctx,
                 yPos,
                 mThumbColorNormal,
                 mThumbColorPressed,
-                mThumbRadiusDP,
-                mThumbImageNormal,
-                mThumbImagePressed)
+                mThumbRadiusDP)
 
         val marginLeft = marginLeft
         val barLength = barLength
@@ -798,39 +729,33 @@ class RangeBar : View {
         }
     }
 
-    // Inner Classes ///////////////////////////////////////////////////////////
-
     /**
      * A callback that notifies clients when the RangeBar has changed. The
      * listener will only be called when either thumb's index has changed - not
      * for every movement of the thumb.
      */
-    interface OnRangeBarChangeListener {
+    interface OnSliderChangeListener {
 
-        fun onIndexChangeListener(rangeBar: RangeBar, leftThumbIndex: Int, rightThumbIndex: Int)
+        fun onIndexChangeListener(slider: Slider, leftIndicatorValue: Int, rightIndicatorValue: Int)
     }
 
     companion object {
 
-        // Member Variables ////////////////////////////////////////////////////////
-
         private val TAG = "RangeBar"
 
         // Default values for variables
-        private val DEFAULT_TICK_COUNT = 3
-        private val DEFAULT_TICK_HEIGHT_DP = 24f
-        private val DEFAULT_BAR_WEIGHT_PX = 2f
-        private val DEFAULT_BAR_COLOR = Color.LTGRAY
-        private val DEFAULT_CONNECTING_LINE_WEIGHT_PX = 4f
-        private val DEFAULT_THUMB_IMAGE_NORMAL = R.drawable.seek_thumb_normal
-        private val DEFAULT_THUMB_IMAGE_PRESSED = R.drawable.seek_thumb_pressed
+        private const val DEFAULT_TICK_COUNT = 3
+        private const val DEFAULT_TICK_HEIGHT_DP = 24f
+        private const val DEFAULT_BAR_WEIGHT_PX = 2f
+        private const val DEFAULT_BAR_COLOR = Color.LTGRAY
+        private const val DEFAULT_CONNECTING_LINE_WEIGHT_PX = 4f
 
         // Corresponds to android.R.color.holo_blue_light.
-        private val DEFAULT_CONNECTING_LINE_COLOR = -0xcc4a1b
+        private const val DEFAULT_CONNECTING_LINE_COLOR = -0xcc4a1b
 
         // Indicator value tells Thumb.java whether it should draw the circle or not
-        private val DEFAULT_THUMB_RADIUS_DP = -1f
-        private val DEFAULT_THUMB_COLOR_NORMAL = -1
-        private val DEFAULT_THUMB_COLOR_PRESSED = -1
+        private const val DEFAULT_THUMB_RADIUS_DP = -1f
+        private const val DEFAULT_THUMB_COLOR_NORMAL = -1
+        private const val DEFAULT_THUMB_COLOR_PRESSED = -1
     }
 }

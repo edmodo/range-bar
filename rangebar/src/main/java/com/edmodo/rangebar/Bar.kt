@@ -13,34 +13,14 @@
 
 package com.edmodo.rangebar
 
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.util.TypedValue
 
 /**
  * This class represents the underlying gray bar in the RangeBar (without the
  * thumbs).
  */
-internal class Bar
-// Constructor /////////////////////////////////////////////////////////////
-
-(ctx: Context,
-        // Left-coordinate of the horizontal bar.
- /**
-  * Get the x-coordinate of the left edge of the bar.
-  *
-  * @return x-coordinate of the left edge of the bar
-  */
- val leftX: Float,
- private val mY: Float,
- length: Float,
- tickCount: Int,
- tickHeightDP: Float,
- BarWeight: Float,
- BarColor: Int) {
-
-    // Member Variables ////////////////////////////////////////////////////////
+internal class Bar(val leftX: Float, private val mY: Float, length: Float, tickCount: Int, BarWeight: Float, BarColor: Int) {
 
     private val mPaint: Paint
     /**
@@ -48,24 +28,15 @@ internal class Bar
      *
      * @return x-coordinate of the right edge of the bar
      */
-    val rightX: Float
+    val rightX: Float = leftX + length
 
     private var mNumSegments: Int = 0
     private var mTickDistance: Float = 0.toFloat()
-    private val mTickHeight: Float
-    private val mTickStartY: Float
-    private val mTickEndY: Float
 
     init {
-        rightX = leftX + length
 
         mNumSegments = tickCount - 1
         mTickDistance = length / mNumSegments
-        mTickHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                tickHeightDP,
-                ctx.resources.displayMetrics)
-        mTickStartY = mY - mTickHeight / 2f
-        mTickEndY = mY + mTickHeight / 2f
 
         // Initialize the paint.
         mPaint = Paint()
@@ -74,8 +45,6 @@ internal class Bar
         mPaint.isAntiAlias = true
     }
 
-    // Package-Private Methods /////////////////////////////////////////////////
-
     /**
      * Draws the bar on the given Canvas.
      *
@@ -83,10 +52,7 @@ internal class Bar
      * View#onDraw()}
      */
     fun draw(canvas: Canvas) {
-
         canvas.drawLine(leftX, mY, rightX, mY, mPaint)
-
-        drawTicks(canvas)
     }
 
     /**
@@ -124,25 +90,5 @@ internal class Bar
 
         mNumSegments = tickCount - 1
         mTickDistance = barLength / mNumSegments
-    }
-
-    // Private Methods /////////////////////////////////////////////////////////
-
-    /**
-     * Draws the tick marks on the bar.
-     *
-     * @param canvas Canvas to draw on; should be the Canvas passed into {#link
-     * View#onDraw()}
-     */
-    private fun drawTicks(canvas: Canvas) {
-
-        // Loop through and draw each tick (except final tick).
-        for (i in 0 until mNumSegments) {
-            val x = i * mTickDistance + leftX
-            canvas.drawLine(x, mTickStartY, x, mTickEndY, mPaint)
-        }
-        // Draw final tick. We draw the final tick outside the loop to avoid any
-        // rounding discrepancies.
-        canvas.drawLine(rightX, mTickStartY, rightX, mTickEndY, mPaint)
     }
 }
