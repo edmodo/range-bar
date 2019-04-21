@@ -30,8 +30,11 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="50dp"
             android:layout_marginTop="50dp"
-            custom:thumbRadius="6dp"
-            custom:tickCount="7" />
+            custom:minValue="100"
+            custom:maxValue="300"
+            custom:connectingLineColor="@color/colorAccent"
+            custom:indicatorColor="@color/colorAccent"
+            custom:indicatorRadius="2.5dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -99,17 +102,6 @@
                 android:text="@string/refresh"
                 android:textColor="#33B5E5"
                 android:textSize="25sp" />
-
-            <TextView
-                android:id="@+id/tickCount"
-                style="@style/RoboTheme"
-                android:text="@string/tickCount" />
-
-            <SeekBar
-                android:id="@+id/tickCountSeek"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:progress="7" />
 
             <TextView
                 android:id="@+id/tickHeight"

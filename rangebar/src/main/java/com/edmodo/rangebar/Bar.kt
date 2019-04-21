@@ -15,12 +15,13 @@ package com.edmodo.rangebar
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import kotlin.math.roundToInt
 
 /**
  * This class represents the underlying gray bar in the RangeBar (without the
  * thumbs).
  */
-internal class Bar(val leftX: Float, private val mY: Float, length: Float, tickCount: Int, BarWeight: Float, BarColor: Int) {
+internal class Bar(val leftX: Float, private val mY: Float, private val barLength: Float, steps: Int, BarWeight: Float, BarColor: Int) {
 
     private val mPaint: Paint
     /**
@@ -28,15 +29,15 @@ internal class Bar(val leftX: Float, private val mY: Float, length: Float, tickC
      *
      * @return x-coordinate of the right edge of the bar
      */
-    val rightX: Float = leftX + length
+    val rightX: Float = leftX + barLength
 
-    private var mNumSegments: Int = 0
-    private var mTickDistance: Float = 0.toFloat()
+    private var mDeltaMinMaxValue: Int = 0
+    private var mTickDistance: Float = 0f
 
     init {
 
-        mNumSegments = tickCount - 1
-        mTickDistance = length / mNumSegments
+        mDeltaMinMaxValue = steps
+        mTickDistance = barLength / mDeltaMinMaxValue
 
         // Initialize the paint.
         mPaint = Paint()
@@ -76,19 +77,9 @@ internal class Bar(val leftX: Float, private val mY: Float, length: Float, tickC
      */
     fun getNearestTickIndex(thumb: Thumb): Int {
 
-        return ((thumb.x - leftX + mTickDistance / 2f) / mTickDistance).toInt()
+        val leftPx = thumb.x - leftX
+
+        return (mDeltaMinMaxValue.toFloat() * (leftPx / barLength)).roundToInt()
     }
 
-    /**
-     * Set the number of ticks that will appear in the RangeBar.
-     *
-     * @param tickCount the number of ticks
-     */
-    fun setTickCount(tickCount: Int) {
-
-        val barLength = rightX - leftX
-
-        mNumSegments = tickCount - 1
-        mTickDistance = barLength / mNumSegments
-    }
 }

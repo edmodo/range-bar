@@ -22,8 +22,7 @@ import android.util.TypedValue
  * Represents a thumb in the RangeBar slider. This is the handle for the slider
  * that is pressed and slid.
  */
-internal class Thumb(ctx: Context, private val mY: Float, thumbColorNormal: Int, thumbColorPressed: Int,
-                     thumbRadiusDP: Float) {
+internal class Thumb(ctx: Context, private val mY: Float, private var indicatorColor: Int, thumbRadiusDP: Float) {
 
     // Radius (in pixels) of the touch area of the thumb.
     private val mTargetRadiusPx: Float
@@ -50,10 +49,6 @@ internal class Thumb(ctx: Context, private val mY: Float, thumbColorNormal: Int,
     // Radius of the new thumb if selected
     private var mThumbRadiusPx: Float = 0.toFloat()
 
-    // Colors of the thumbs if they are to be drawn
-    private var mThumbColorNormal: Int = 0
-    private var mThumbColorPressed: Int = 0
-
     init {
 
         val res = ctx.resources
@@ -69,23 +64,17 @@ internal class Thumb(ctx: Context, private val mY: Float, thumbColorNormal: Int,
                     thumbRadiusDP,
                     res.displayMetrics)
 
-        if (thumbColorNormal == -1)
-            mThumbColorNormal = DEFAULT_THUMB_COLOR_NORMAL
-        else
-            mThumbColorNormal = thumbColorNormal
-
-        if (thumbColorPressed == -1)
-            mThumbColorPressed = DEFAULT_THUMB_COLOR_PRESSED
-        else
-            mThumbColorPressed = thumbColorPressed
+        if (indicatorColor == -1)
+            indicatorColor = DEFAULT_THUMB_COLOR_NORMAL
 
         // Creates the paint and sets the Paint values
         mPaintNormal = Paint()
-        mPaintNormal!!.color = mThumbColorNormal
+        mPaintNormal!!.color = indicatorColor
         mPaintNormal!!.isAntiAlias = true
 
         mPaintPressed = Paint()
-        mPaintPressed!!.color = mThumbColorPressed
+        mPaintPressed!!.color = indicatorColor
+        mPaintPressed!!.alpha = 50
         mPaintPressed!!.isAntiAlias = true
 
         halfWidth = mThumbRadiusPx
@@ -131,10 +120,12 @@ internal class Thumb(ctx: Context, private val mY: Float, thumbColorNormal: Int,
     fun draw(canvas: Canvas) {
 
         // Otherwise use a circle to display.
-        if (isPressed)
-            canvas.drawCircle(x, mY, mThumbRadiusPx, mPaintPressed!!)
-        else
+        if (isPressed) {
+            canvas.drawCircle(x, mY, mThumbRadiusPx * INDICATOR_PRESSED_SCALE_OUTSIDE, mPaintPressed!!)
+            canvas.drawCircle(x, mY, mThumbRadiusPx * INDICATOR_PRESSED_SCALE, mPaintNormal!!)
+        } else {
             canvas.drawCircle(x, mY, mThumbRadiusPx, mPaintNormal!!)
+        }
     }
 
     companion object {
@@ -149,6 +140,8 @@ internal class Thumb(ctx: Context, private val mY: Float, thumbColorNormal: Int,
 
         // Corresponds to android.R.color.holo_blue_light.
         private const val DEFAULT_THUMB_COLOR_NORMAL = -0xcc4a1b
-        private const val DEFAULT_THUMB_COLOR_PRESSED = -0xcc4a1b
+
+        private const val INDICATOR_PRESSED_SCALE_OUTSIDE = 2.5f
+        private const val INDICATOR_PRESSED_SCALE = 1.2f
     }
 }

@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.Log
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 
@@ -38,15 +39,13 @@ import android.view.View
 class Slider : View {
 
     // Instance variables for all of the customizable attributes
-    private var mTickCount = DEFAULT_TICK_COUNT
     private var mBarWeight = DEFAULT_BAR_WEIGHT_PX
     private var mBarColor = DEFAULT_BAR_COLOR
     private var mConnectingLineWeight = DEFAULT_CONNECTING_LINE_WEIGHT_PX
     private var mConnectingLineColor = DEFAULT_CONNECTING_LINE_COLOR
 
     private var mThumbRadiusDP = DEFAULT_THUMB_RADIUS_DP
-    private var mThumbColorNormal = DEFAULT_THUMB_COLOR_NORMAL
-    private var mThumbColorPressed = DEFAULT_THUMB_COLOR_PRESSED
+    private var mIndicatorColor = DEFAULT_THUMB_COLOR_NORMAL
 
     // setTickCount only resets indices before a thumb has been pressed or a
     // setThumbIndices() is called, to correspond with intended usage
@@ -59,6 +58,9 @@ class Slider : View {
     private lateinit var mRightThumb: Thumb
     private var mBar: Bar? = null
     private var mConnectingLine: ConnectingLine? = null
+
+    private var minSliderValue = 0f
+    private var maxSliderValue = 0f
 
     private var mListener: Slider.OnSliderChangeListener? = null
     /**
@@ -73,7 +75,7 @@ class Slider : View {
      *
      * @return the 0-based index of the right thumb
      */
-    var rightIndex = mTickCount - 1
+    var rightIndex = 0
         private set
 
     /**
@@ -103,19 +105,17 @@ class Slider : View {
     private val barLength: Float
         get() = width - 2 * marginLeft
 
-    // Constructors ////////////////////////////////////////////////////////////
+    private var stepsSize: Int = 0
 
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        rangeBarInit(context, attrs)
+        sliderInit(context, attrs)
     }
 
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {
-        rangeBarInit(context, attrs)
+        sliderInit(context, attrs)
     }
-
-    // View Methods ////////////////////////////////////////////////////////////
 
     public override fun onSaveInstanceState(): Parcelable? {
 
@@ -123,18 +123,19 @@ class Slider : View {
 
         bundle.putParcelable("instanceState", super.onSaveInstanceState())
 
-        bundle.putInt("TICK_COUNT", mTickCount)
         bundle.putFloat("BAR_WEIGHT", mBarWeight)
         bundle.putInt("BAR_COLOR", mBarColor)
         bundle.putFloat("CONNECTING_LINE_WEIGHT", mConnectingLineWeight)
         bundle.putInt("CONNECTING_LINE_COLOR", mConnectingLineColor)
 
         bundle.putFloat("THUMB_RADIUS_DP", mThumbRadiusDP)
-        bundle.putInt("THUMB_COLOR_NORMAL", mThumbColorNormal)
-        bundle.putInt("THUMB_COLOR_PRESSED", mThumbColorPressed)
+        bundle.putInt("THUMB_COLOR_NORMAL", mIndicatorColor)
 
         bundle.putInt("LEFT_INDEX", leftIndex)
         bundle.putInt("RIGHT_INDEX", rightIndex)
+
+        bundle.putFloat("MIN_VALUE", minSliderValue)
+        bundle.putFloat("MAX_VALUE", maxSliderValue)
 
         bundle.putBoolean("FIRST_SET_TICK_COUNT", mFirstSetTickCount)
 
@@ -145,19 +146,20 @@ class Slider : View {
 
         if (state is Bundle) {
 
-            mTickCount = state.getInt("TICK_COUNT")
             mBarWeight = state.getFloat("BAR_WEIGHT")
             mBarColor = state.getInt("BAR_COLOR")
             mConnectingLineWeight = state.getFloat("CONNECTING_LINE_WEIGHT")
             mConnectingLineColor = state.getInt("CONNECTING_LINE_COLOR")
 
             mThumbRadiusDP = state.getFloat("THUMB_RADIUS_DP")
-            mThumbColorNormal = state.getInt("THUMB_COLOR_NORMAL")
-            mThumbColorPressed = state.getInt("THUMB_COLOR_PRESSED")
+            mIndicatorColor = state.getInt("THUMB_COLOR_NORMAL")
 
             leftIndex = state.getInt("LEFT_INDEX")
             rightIndex = state.getInt("RIGHT_INDEX")
             mFirstSetTickCount = state.getBoolean("FIRST_SET_TICK_COUNT")
+
+            minSliderValue = state.getFloat("MIN_VALUE")
+            maxSliderValue = state.getFloat("MAX_VALUE")
 
             setThumbIndices(leftIndex, rightIndex)
 
@@ -213,23 +215,21 @@ class Slider : View {
         val yPos = h / 2f
         mLeftThumb = Thumb(ctx,
                 yPos,
-                mThumbColorNormal,
-                mThumbColorPressed,
+                mIndicatorColor,
                 mThumbRadiusDP)
         mRightThumb = Thumb(ctx,
                 yPos,
-                mThumbColorNormal,
-                mThumbColorPressed,
+                mIndicatorColor,
                 mThumbRadiusDP)
 
         // Create the underlying bar.
         val marginLeft = mLeftThumb.halfWidth
         val barLength = w - 2 * marginLeft
-        mBar = Bar(marginLeft, yPos, barLength, mTickCount, mBarWeight, mBarColor)
+        mBar = Bar(marginLeft, yPos, barLength, stepsSize, mBarWeight, mBarColor)
 
         // Initialize thumbs to the desired indices
-        mLeftThumb.x = marginLeft + leftIndex / (mTickCount - 1).toFloat() * barLength
-        mRightThumb.x = marginLeft + rightIndex / (mTickCount - 1).toFloat() * barLength
+        mLeftThumb.x = getThumbLeftPosition()
+        mRightThumb.x = getThumbRightPosition()
 
         // Set the thumb indices.
         val newLeftIndex = mBar?.getNearestTickIndex(mLeftThumb)
@@ -253,9 +253,9 @@ class Slider : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        mBar!!.draw(canvas)
+        mBar?.draw(canvas)
 
-        mConnectingLine!!.draw(canvas, mLeftThumb, mRightThumb)
+        mConnectingLine?.draw(canvas, mLeftThumb, mRightThumb)
 
         mLeftThumb.draw(canvas)
         mRightThumb.draw(canvas)
@@ -269,26 +269,26 @@ class Slider : View {
             return false
         }
 
-        when (event.action) {
+        return when (event.action) {
 
             MotionEvent.ACTION_DOWN -> {
                 onActionDown(event.x, event.y)
-                return true
+                true
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 this.parent.requestDisallowInterceptTouchEvent(false)
                 onActionUp(event.x)
-                return true
+                true
             }
 
             MotionEvent.ACTION_MOVE -> {
                 onActionMove(event.x)
                 this.parent.requestDisallowInterceptTouchEvent(true)
-                return true
+                true
             }
 
-            else -> return false
+            else -> false
         }
     }
 
@@ -301,42 +301,6 @@ class Slider : View {
      */
     fun setOnRangeBarChangeListener(listener: Slider.OnSliderChangeListener) {
         mListener = listener
-    }
-
-    /**
-     * Sets the number of ticks in the RangeBar.
-     *
-     * @param tickCount Integer specifying the number of ticks.
-     */
-    fun setTickCount(tickCount: Int) {
-
-        if (isValidTickCount(tickCount)) {
-            mTickCount = tickCount
-
-            // Prevents resetting the indices when creating new activity, but
-            // allows it on the first setting.
-            if (mFirstSetTickCount) {
-                leftIndex = 0
-                rightIndex = mTickCount - 1
-
-                if (mListener != null) {
-                    mListener!!.onIndexChangeListener(this, leftIndex, rightIndex)
-                }
-            }
-            if (indexOutOfRange(leftIndex, rightIndex)) {
-                leftIndex = 0
-                rightIndex = mTickCount - 1
-
-                if (mListener != null)
-                    mListener!!.onIndexChangeListener(this, leftIndex, rightIndex)
-            }
-
-            createBar()
-            createThumbs()
-        } else {
-            Log.e(TAG, "tickCount less than 2; invalid tickCount.")
-            throw IllegalArgumentException("tickCount less than 2; invalid tickCount.")
-        }
     }
 
     /**
@@ -394,30 +358,6 @@ class Slider : View {
     }
 
     /**
-     * If this is set, the thumb images will be replaced with a circle. The
-     * normal image will be of the specified color.
-     *
-     * @param thumbColorNormal Integer specifying the normal color of the circle
-     * to be drawn.
-     */
-    fun setThumbColorNormal(thumbColorNormal: Int) {
-        mThumbColorNormal = thumbColorNormal
-        createThumbs()
-    }
-
-    /**
-     * If this is set, the thumb images will be replaced with a circle. The
-     * pressed image will be of the specified color.
-     *
-     * @param thumbColorPressed Integer specifying the pressed color of the
-     * circle to be drawn.
-     */
-    fun setThumbColorPressed(thumbColorPressed: Int) {
-        mThumbColorPressed = thumbColorPressed
-        createThumbs()
-    }
-
-    /**
      * Sets the location of each thumb according to the developer's choice.
      * Numbered from 0 to mTickCount - 1 from the left.
      *
@@ -458,39 +398,41 @@ class Slider : View {
      * @param attrs AttributeSet from the constructor.
      * @return none
      */
-    private fun rangeBarInit(context: Context, attrs: AttributeSet) {
+    private fun sliderInit(context: Context, attrs: AttributeSet) {
         val ta = context.obtainStyledAttributes(attrs, R.styleable.Slider, 0, 0)
 
         try {
 
+            mBarWeight = ta.getDimension(R.styleable.Slider_barWeight, DEFAULT_BAR_WEIGHT_PX)
+            mBarColor = ta.getColor(R.styleable.Slider_barColor, DEFAULT_BAR_COLOR)
+            mConnectingLineWeight = ta.getDimension(R.styleable.Slider_connectingLineWeight, DEFAULT_CONNECTING_LINE_WEIGHT_PX)
+            mConnectingLineColor = ta.getColor(R.styleable.Slider_connectingLineColor, DEFAULT_CONNECTING_LINE_COLOR)
+            mThumbRadiusDP = ta.getDimension(R.styleable.Slider_indicatorRadius, DEFAULT_THUMB_RADIUS_DP)
+            mIndicatorColor = ta.getColor(R.styleable.Slider_indicatorColor, DEFAULT_THUMB_COLOR_NORMAL)
+
+            minSliderValue = ta.getFloat(R.styleable.Slider_minValue, 0f)
+            maxSliderValue = ta.getFloat(R.styleable.Slider_maxValue, 0f)
+            if (minSliderValue > maxSliderValue) {
+                throw IllegalStateException("The minValue $minSliderValue can't be major of maxValue $maxSliderValue")
+            }
+
             // Sets the values of the user-defined attributes based on the XML
             // attributes.
-            val tickCount = ta.getInteger(R.styleable.Slider_tickCount, DEFAULT_TICK_COUNT)
+            val delta = maxSliderValue - minSliderValue
 
-            if (isValidTickCount(tickCount)) {
+            if (isValidTickCount(delta.toInt())) {
 
                 // Similar functions performed above in setTickCount; make sure
                 // you know how they interact
-                mTickCount = tickCount
-                leftIndex = 0
-                rightIndex = mTickCount - 1
+                stepsSize = delta.toInt()
 
                 if (mListener != null) {
                     mListener!!.onIndexChangeListener(this, leftIndex, rightIndex)
                 }
 
             } else {
-
                 Log.e(TAG, "tickCount less than 2; invalid tickCount. XML input ignored.")
             }
-
-            mBarWeight = ta.getDimension(R.styleable.Slider_barWeight, DEFAULT_BAR_WEIGHT_PX)
-            mBarColor = ta.getColor(R.styleable.Slider_barColor, DEFAULT_BAR_COLOR)
-            mConnectingLineWeight = ta.getDimension(R.styleable.Slider_connectingLineWeight, DEFAULT_CONNECTING_LINE_WEIGHT_PX)
-            mConnectingLineColor = ta.getColor(R.styleable.Slider_connectingLineColor, DEFAULT_CONNECTING_LINE_COLOR)
-            mThumbRadiusDP = ta.getDimension(R.styleable.Slider_thumbRadius, DEFAULT_THUMB_RADIUS_DP)
-            mThumbColorNormal = ta.getColor(R.styleable.Slider_thumbColorNormal, DEFAULT_THUMB_COLOR_NORMAL)
-            mThumbColorPressed = ta.getColor(R.styleable.Slider_thumbColorPressed, DEFAULT_THUMB_COLOR_PRESSED)
 
         } finally {
 
@@ -509,7 +451,7 @@ class Slider : View {
         mBar = Bar(marginLeft,
                 yPos,
                 barLength,
-                mTickCount,
+                stepsSize,
                 mBarWeight,
                 mBarColor)
         invalidate()
@@ -541,24 +483,23 @@ class Slider : View {
 
         mLeftThumb = Thumb(ctx,
                 yPos,
-                mThumbColorNormal,
-                mThumbColorPressed,
+                mIndicatorColor,
                 mThumbRadiusDP)
         mRightThumb = Thumb(ctx,
                 yPos,
-                mThumbColorNormal,
-                mThumbColorPressed,
+                mIndicatorColor,
                 mThumbRadiusDP)
 
-        val marginLeft = marginLeft
-        val barLength = barLength
-
         // Initialize thumbs to the desired indices
-        mLeftThumb.x = marginLeft + leftIndex / (mTickCount - 1).toFloat() * barLength
-        mRightThumb.x = marginLeft + rightIndex / (mTickCount - 1).toFloat() * barLength
+        mLeftThumb.x = getThumbLeftPosition()
+        mRightThumb.x = getThumbRightPosition()
 
         invalidate()
     }
+
+    private fun getThumbLeftPosition() = marginLeft + ((leftIndex.toFloat() - minSliderValue) / (maxSliderValue - minSliderValue)) * barLength
+
+    private fun getThumbRightPosition() = marginLeft + ((rightIndex.toFloat() - minSliderValue) / (maxSliderValue - minSliderValue)) * barLength
 
     /**
      * Returns if either index is outside the range of the tickCount.
@@ -568,9 +509,7 @@ class Slider : View {
      * @return boolean If the index is out of range.
      */
     private fun indexOutOfRange(leftThumbIndex: Int, rightThumbIndex: Int): Boolean {
-        return (leftThumbIndex < 0 || leftThumbIndex >= mTickCount
-                || rightThumbIndex < 0
-                || rightThumbIndex >= mTickCount)
+        return leftThumbIndex < minSliderValue || rightThumbIndex > maxSliderValue
     }
 
     /**
@@ -669,8 +608,8 @@ class Slider : View {
         }
 
         // Get the updated nearest tick marks for each thumb.
-        val newLeftIndex = mBar!!.getNearestTickIndex(mLeftThumb)
-        val newRightIndex = mBar!!.getNearestTickIndex(mRightThumb)
+        val newLeftIndex = mBar!!.getNearestTickIndex(mLeftThumb) + minSliderValue.toInt()
+        val newRightIndex = mBar!!.getNearestTickIndex(mRightThumb) + minSliderValue.toInt()
 
         // If either of the indices have changed, update and call the listener.
         if (newLeftIndex != leftIndex || newRightIndex != rightIndex) {
@@ -691,7 +630,7 @@ class Slider : View {
      * @param thumb the thumb to press
      */
     private fun pressThumb(thumb: Thumb) {
-        if (mFirstSetTickCount == true)
+        if (mFirstSetTickCount)
             mFirstSetTickCount = false
         thumb.press()
         invalidate()
@@ -705,8 +644,8 @@ class Slider : View {
      */
     private fun releaseThumb(thumb: Thumb) {
 
-        val nearestTickX = mBar!!.getNearestTickCoordinate(thumb)
-        thumb.x = nearestTickX
+        val nearestTicchakX = mBar!!.getNearestTickCoordinate(thumb)
+        thumb.x = nearestTicchakX
         thumb.release()
         invalidate()
     }
@@ -741,7 +680,7 @@ class Slider : View {
 
     companion object {
 
-        private val TAG = "RangeBar"
+        private val TAG = "Slider"
 
         // Default values for variables
         private const val DEFAULT_TICK_COUNT = 3

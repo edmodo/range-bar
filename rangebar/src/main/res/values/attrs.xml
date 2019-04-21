@@ -1,21 +1,16 @@
 <resources>
 
     <declare-styleable name="Slider">
-        <attr name="minValue" format="integer"/>
-        <attr name="maxValue" format="integer"/>
+        <attr name="minValue" format="float"/>
+        <attr name="maxValue" format="float"/>
         <attr name="currentLeftValue" format="integer"/>
         <attr name="currentRightValue" format="integer"/>
-        <attr name="tickCount" format="integer" />
-        <attr name="tickHeight" format="dimension" />
         <attr name="barWeight" format="dimension" />
         <attr name="barColor" format="reference|color" />
         <attr name="connectingLineWeight" format="dimension" />
         <attr name="connectingLineColor" format="reference|color" />
-        <attr name="thumbRadius" format="dimension" />
-        <attr name="thumbImageNormal" format="reference" />
-        <attr name="thumbImagePressed" format="reference" />
-        <attr name="thumbColorNormal" format="reference|color"/>
-        <attr name="thumbColorPressed" format="reference|color"/>
+        <attr name="indicatorRadius" format="dimension" />
+        <attr name="indicatorColor" format="reference|color"/>
     </declare-styleable>
 
 </resources>

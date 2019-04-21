@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.edmodo.rangebar.Slider;
 
-public class MainActivity extends Activity implements ColorPickerDialog.OnColorChangedListener {
+public class MainActivity extends Activity {
 
     // Corresponds to Color.LTGRAY
     private static final int DEFAULT_BAR_COLOR = 0xffcccccc;
@@ -57,13 +57,6 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
         mThumbColorNormal = bundle.getInt("THUMB_COLOR_NORMAL");
         mThumbColorPressed = bundle.getInt("THUMB_COLOR_PRESSED");
 
-        // Change the text colors to the appropriate colors, and the text as
-        // well
-        colorChanged(Component.BAR_COLOR, mBarColor);
-        colorChanged(Component.CONNECTING_LINE_COLOR, mConnectingLineColor);
-        colorChanged(Component.THUMB_COLOR_NORMAL, mThumbColorNormal);
-        colorChanged(Component.THUMB_COLOR_PRESSED, mThumbColorPressed);
-
         // Gets the RangeBar
         rangebar = (Slider) findViewById(R.id.rangebar1);
 
@@ -84,7 +77,6 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
         super.onCreate(savedInstanceState);
 
         // Removes title bar and sets content view
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
         // Sets fonts for all
@@ -105,7 +97,6 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
 
         // Gets the RangeBar
         rangebar = (Slider) findViewById(R.id.rangebar1);
-
         // Setting Index Values -------------------------------
 
         // Gets the index value TextViews
@@ -122,6 +113,9 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
             }
         });
 
+        rangebar.setThumbIndices(150, 250);
+
+
         // Sets the indices themselves upon input from the user
         refreshButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -133,10 +127,11 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
                 // Catches any IllegalArgumentExceptions; if fails, should throw
                 // a dialog warning the user
                 try {
-                    if (!leftIndex.isEmpty() && !rightIndex.isEmpty())
-                    {
+                    if (!leftIndex.isEmpty() && !rightIndex.isEmpty()) {
                         int leftIntIndex = Integer.parseInt(leftIndex);
                         int rightIntIndex = Integer.parseInt(rightIndex);
+
+
                         rangebar.setThumbIndices(leftIntIndex, rightIntIndex);
                     }
                 } catch (IllegalArgumentException e) {
@@ -145,29 +140,7 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
         });
 
         // Setting Number Attributes -------------------------------
-
-        // Sets tickCount
-        final TextView tickCount = (TextView) findViewById(R.id.tickCount);
-        SeekBar tickCountSeek = (SeekBar) findViewById(R.id.tickCountSeek);
-        tickCountSeek.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar tickCountSeek, int progress, boolean fromUser) {
-                try {
-                    rangebar.setTickCount(progress);
-                } catch (IllegalArgumentException e) {
-                }
-                tickCount.setText("tickCount = " + progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
+/*
         // Sets tickHeight
         final TextView tickHeight = (TextView) findViewById(R.id.tickHeight);
         SeekBar tickHeightSeek = (SeekBar) findViewById(R.id.tickHeightSeek);
@@ -295,85 +268,8 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
                 thumbColorNormal.setTextColor(HOLO_BLUE);
                 thumbColorPressed.setTextColor(HOLO_BLUE);
             }
-        });
+        });*/
 
-    }
-
-    /**
-     * Sets the changed color using the ColorPickerDialog.
-     * 
-     * @param component Component specifying which input is being used
-     * @param newColor Integer specifying the new color to be selected.
-     */
-    @Override
-    public void colorChanged(Component component, int newColor) {
-
-        String hexColor = String.format("#%06X", (0xFFFFFF & newColor));
-
-        switch (component)
-        {
-            case BAR_COLOR:
-                mBarColor = newColor;
-                rangebar.setBarColor(newColor);
-                final TextView barColorText = (TextView) findViewById(R.id.barColor);
-                barColorText.setText("barColor = " + hexColor);
-                barColorText.setTextColor(newColor);
-                break;
-
-            case CONNECTING_LINE_COLOR:
-                mConnectingLineColor = newColor;
-                rangebar.setConnectingLineColor(newColor);
-                final TextView connectingLineColorText = (TextView) findViewById(R.id.connectingLineColor);
-                connectingLineColorText.setText("connectingLineColor = " + hexColor);
-                connectingLineColorText.setTextColor(newColor);
-                break;
-
-            case THUMB_COLOR_NORMAL:
-                mThumbColorNormal = newColor;
-                rangebar.setThumbColorNormal(newColor);
-                final TextView thumbColorNormalText = (TextView) findViewById(R.id.thumbColorNormal);
-
-                if (newColor == -1) {
-                    thumbColorNormalText.setText("thumbColorNormal = N/A");
-                    thumbColorNormalText.setTextColor(HOLO_BLUE);
-                }
-                else {
-                    thumbColorNormalText.setText("thumbColorNormal = " + hexColor);
-                    thumbColorNormalText.setTextColor(newColor);
-                }
-                break;
-
-            case THUMB_COLOR_PRESSED:
-                mThumbColorPressed = newColor;
-                rangebar.setThumbColorPressed(newColor);
-                final TextView thumbColorPressedText = (TextView) findViewById(R.id.thumbColorPressed);
-
-                if (newColor == -1) {
-                    thumbColorPressedText.setText("thumbColorPressed = N/A");
-                    thumbColorPressedText.setTextColor(HOLO_BLUE);
-                }
-                else {
-                    thumbColorPressedText.setText("thumbColorPressed = " + hexColor);
-                    thumbColorPressedText.setTextColor(newColor);
-                }
-        }
-    }
-
-    /**
-     * Sets the font on all TextViews in the ViewGroup. Searches recursively for
-     * all inner ViewGroups as well. Just add a check for any other views you
-     * want to set as well (EditText, etc.)
-     */
-    private void setFont(ViewGroup group, Typeface font) {
-        int count = group.getChildCount();
-        View v;
-        for (int i = 0; i < count; i++) {
-            v = group.getChildAt(i);
-            if (v instanceof TextView || v instanceof EditText || v instanceof Button) {
-                ((TextView) v).setTypeface(font);
-            } else if (v instanceof ViewGroup)
-                setFont((ViewGroup) v, font);
-        }
     }
 
     @Override
@@ -383,22 +279,5 @@ public class MainActivity extends Activity implements ColorPickerDialog.OnColorC
         return true;
     }
 
-    /**
-     * Initiates the colorPicker from within a button function.
-     * 
-     * @param component Component specifying which input is being used
-     * @param initialColor Integer specifying the initial color choice. *
-     * @param defaultColor Integer specifying the default color choice.
-     */
-    private void initColorPicker(Component component, int initialColor, int defaultColor)
-    {
-        ColorPickerDialog colorPicker = new ColorPickerDialog(this,
-                                                              this,
-                                                              component,
-                                                              initialColor,
-                                                              defaultColor);
-        colorPicker.show();
-
-    }
 
 }
