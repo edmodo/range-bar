@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License. 
  */
 
-package com.edmodo.rangebar
+package com.edmodo.slider
 
 import android.content.Context
 import android.graphics.Canvas

@@ -2,19 +2,14 @@
 package com.example.rangebarsample;
 
 import android.app.Activity;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-import com.edmodo.rangebar.Slider;
+import com.edmodo.slider.Slider;
 
 public class MainActivity extends Activity {
 
