@@ -231,21 +231,6 @@ class Slider : View {
         mLeftThumb.x = getThumbLeftPosition()
         mRightThumb.x = getThumbRightPosition()
 
-        // Set the thumb indices.
-        val newLeftIndex = mBar?.getNearestTickIndex(mLeftThumb)
-        val newRightIndex = mBar?.getNearestTickIndex(mRightThumb)
-
-        // Call the listener.
-        if (newLeftIndex != leftIndex || newRightIndex != rightIndex) {
-
-            leftIndex = newLeftIndex ?: 0
-            rightIndex = newRightIndex ?: 0
-
-            if (mListener != null) {
-                mListener!!.onIndexChangeListener(this, leftIndex, rightIndex)
-            }
-        }
-
         // Create the line connecting the two thumbs.
         mConnectingLine = ConnectingLine(ctx, yPos, mConnectingLineWeight, mConnectingLineColor)
     }
