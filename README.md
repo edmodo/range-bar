@@ -8,7 +8,7 @@ Supported on API Level 7 and above.
 
 License
 =======
-Copyright 2013, Edmodo, Inc. and Chili Spa
+Copyright 2013, Edmodo, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License.
 You may obtain a copy of the License in the LICENSE file, or at:
