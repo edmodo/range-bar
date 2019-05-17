@@ -1,141 +1,131 @@
+package com.example.slidersample
 
-package com.example.slidersample;
+import android.app.Activity
+import android.os.Bundle
+import android.view.Menu
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import com.chili.slider.Slider
 
-import com.chili.slider.Slider;
-
-public class MainActivity extends Activity {
-
-    // Corresponds to Color.LTGRAY
-    private static final int DEFAULT_BAR_COLOR = 0xffcccccc;
-
-    // Corresponds to android.R.color.holo_blue_light.
-    private static final int DEFAULT_CONNECTING_LINE_COLOR = 0xff33b5e5;
-    private static final int HOLO_BLUE = 0xff33b5e5;
-
-    // Sets the initial values such that the image will be drawn
-    private static final int DEFAULT_THUMB_COLOR_NORMAL = -1;
-    private static final int DEFAULT_THUMB_COLOR_PRESSED = -1;
+class MainActivity : Activity() {
 
     // Sets variables to save the colors of each attribute
-    private int mBarColor = DEFAULT_BAR_COLOR;
-    private int mConnectingLineColor = DEFAULT_CONNECTING_LINE_COLOR;
-    private int mThumbColorNormal = DEFAULT_THUMB_COLOR_NORMAL;
-    private int mThumbColorPressed = DEFAULT_THUMB_COLOR_PRESSED;
+    private var mBarColor = DEFAULT_BAR_COLOR
+    private var mConnectingLineColor = DEFAULT_CONNECTING_LINE_COLOR
+    private var mThumbColorNormal = DEFAULT_THUMB_COLOR_NORMAL
+    private var mThumbColorPressed = DEFAULT_THUMB_COLOR_PRESSED
 
     // Initializes the RangeBar in the application
-    private Slider rangebar;
+    private var rangebar: Slider? = null
 
     // Saves the state upon rotating the screen/restarting the activity
-    @Override
-    protected void onSaveInstanceState(Bundle bundle) {
-        super.onSaveInstanceState(bundle);
-        bundle.putInt("BAR_COLOR", mBarColor);
-        bundle.putInt("CONNECTING_LINE_COLOR", mConnectingLineColor);
-        bundle.putInt("THUMB_COLOR_NORMAL", mThumbColorNormal);
-        bundle.putInt("THUMB_COLOR_PRESSED", mThumbColorPressed);
+    override fun onSaveInstanceState(bundle: Bundle) {
+        super.onSaveInstanceState(bundle)
+        bundle.putInt("BAR_COLOR", mBarColor)
+        bundle.putInt("CONNECTING_LINE_COLOR", mConnectingLineColor)
+        bundle.putInt("THUMB_COLOR_NORMAL", mThumbColorNormal)
+        bundle.putInt("THUMB_COLOR_PRESSED", mThumbColorPressed)
     }
 
     // Restores the state upon rotating the screen/restarting the activity
-    @Override
-    protected void onRestoreInstanceState(Bundle bundle) {
-        super.onRestoreInstanceState(bundle);
-        mBarColor = bundle.getInt("BAR_COLOR");
-        mConnectingLineColor = bundle.getInt("CONNECTING_LINE_COLOR");
-        mThumbColorNormal = bundle.getInt("THUMB_COLOR_NORMAL");
-        mThumbColorPressed = bundle.getInt("THUMB_COLOR_PRESSED");
+    override fun onRestoreInstanceState(bundle: Bundle) {
+        super.onRestoreInstanceState(bundle)
+        mBarColor = bundle.getInt("BAR_COLOR")
+        mConnectingLineColor = bundle.getInt("CONNECTING_LINE_COLOR")
+        mThumbColorNormal = bundle.getInt("THUMB_COLOR_NORMAL")
+        mThumbColorPressed = bundle.getInt("THUMB_COLOR_PRESSED")
 
         // Gets the RangeBar
-        rangebar = (Slider) findViewById(R.id.rangebar1);
+        rangebar = findViewById<View>(R.id.rangebar1) as Slider
 
         // Gets the index value TextViews
-        final TextView leftIndexValue = (TextView) findViewById(R.id.leftIndexValue);
-        final TextView rightIndexValue = (TextView) findViewById(R.id.rightIndexValue);
+        val leftIndexValue = findViewById<View>(R.id.leftIndexValue) as TextView
+        val rightIndexValue = findViewById<View>(R.id.rightIndexValue) as TextView
         // Resets the index values every time the activity is changed
-        leftIndexValue.setText("" + rangebar.getLeftIndex());
-        rightIndexValue.setText("" + rangebar.getRightIndex());
+        leftIndexValue.text = "" + rangebar!!.leftIndex
+        rightIndexValue.text = "" + rangebar!!.rightIndex
 
         // Sets focus to the main layout, not the index text fields
-        findViewById(R.id.mylayout).requestFocus();
-
+        findViewById<View>(R.id.mylayout).requestFocus()
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         // Removes title bar and sets content view
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main)
 
         // Sets fonts for all
 
         // Gets the buttons references for the buttons
-        final Button barColor = (Button) findViewById(R.id.barColor);
-        final Button connectingLineColor = (Button) findViewById(R.id.connectingLineColor);
-        final Button thumbColorNormal = (Button) findViewById(R.id.thumbColorNormal);
-        final Button thumbColorPressed = (Button) findViewById(R.id.thumbColorPressed);
-        final Button resetThumbColors = (Button) findViewById(R.id.resetThumbColors);
-        final Button refreshButton = (Button) findViewById(R.id.refresh);
-        
+        val barColor = findViewById<View>(R.id.barColor) as Button
+        val connectingLineColor = findViewById<View>(R.id.connectingLineColor) as Button
+        val thumbColorNormal = findViewById<View>(R.id.thumbColorNormal) as Button
+        val thumbColorPressed = findViewById<View>(R.id.thumbColorPressed) as Button
+        val resetThumbColors = findViewById<View>(R.id.resetThumbColors) as Button
+        val refreshButton = findViewById<View>(R.id.refresh) as Button
+
         // Sets initial colors for the Color buttons
-        barColor.setTextColor(DEFAULT_BAR_COLOR);
-        connectingLineColor.setTextColor(DEFAULT_CONNECTING_LINE_COLOR);
-        thumbColorNormal.setTextColor(HOLO_BLUE);
-        thumbColorPressed.setTextColor(HOLO_BLUE);
+        barColor.setTextColor(DEFAULT_BAR_COLOR)
+        connectingLineColor.setTextColor(DEFAULT_CONNECTING_LINE_COLOR)
+        thumbColorNormal.setTextColor(HOLO_BLUE)
+        thumbColorPressed.setTextColor(HOLO_BLUE)
 
         // Gets the RangeBar
-        rangebar = (Slider) findViewById(R.id.rangebar1);
+        rangebar = findViewById<View>(R.id.rangebar1) as Slider
         // Setting Index Values -------------------------------
 
         // Gets the index value TextViews
-        final EditText leftIndexValue = (EditText) findViewById(R.id.leftIndexValue);
-        final EditText rightIndexValue = (EditText) findViewById(R.id.rightIndexValue);
+        val leftIndexValue = findViewById<View>(R.id.leftIndexValue) as EditText
+        val rightIndexValue = findViewById<View>(R.id.rightIndexValue) as EditText
 
         // Sets the display values of the indices
-        rangebar.setOnRangeBarChangeListener(new Slider.OnSliderChangeListener() {
-            @Override
-            public void onIndexChangeListener(Slider slider, int leftThumbIndex, int rightThumbIndex) {
+        rangebar!!.setOnRangeBarChangeListener(object : Slider.OnSliderChangeListener {
 
-                leftIndexValue.setText("" + leftThumbIndex);
-                rightIndexValue.setText("" + rightThumbIndex);
+            override fun onRelease(slider: Slider, leftIndicatorValue: Int, rightIndicatorValue: Int) {
+                Toast.makeText(this@MainActivity, "Changed: $leftIndicatorValue $rightIndicatorValue", Toast.LENGTH_LONG).show()
             }
-        });
 
-        rangebar.setThumbIndices(150, 250);
+            override fun onIndexChange(slider: Slider, leftThumbIndex: Int, rightThumbIndex: Int) {
+
+                leftIndexValue.setText("" + leftThumbIndex)
+                rightIndexValue.setText("" + rightThumbIndex)
+            }
+
+        })
+
+        rangebar?.minSliderValue = 100f
+        rangebar?.maxSliderValue = 300f
+
+        rangebar?.setThumbIndices(150, 250)
 
 
         // Sets the indices themselves upon input from the user
-        refreshButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+        refreshButton.setOnClickListener {
+            // Gets the String values of all the texts
+            val leftIndex = leftIndexValue.text.toString()
+            val rightIndex = rightIndexValue.text.toString()
 
-                // Gets the String values of all the texts
-                String leftIndex = leftIndexValue.getText().toString();
-                String rightIndex = rightIndexValue.getText().toString();
+            // Catches any IllegalArgumentExceptions; if fails, should throw
+            // a dialog warning the user
+            try {
+                if (!leftIndex.isEmpty() && !rightIndex.isEmpty()) {
+                    val leftIntIndex = Integer.parseInt(leftIndex)
+                    val rightIntIndex = Integer.parseInt(rightIndex)
 
-                // Catches any IllegalArgumentExceptions; if fails, should throw
-                // a dialog warning the user
-                try {
-                    if (!leftIndex.isEmpty() && !rightIndex.isEmpty()) {
-                        int leftIntIndex = Integer.parseInt(leftIndex);
-                        int rightIntIndex = Integer.parseInt(rightIndex);
+                    rangebar?.setThumbIndices(leftIntIndex, rightIntIndex)
 
-
-                        rangebar.setThumbIndices(leftIntIndex, rightIntIndex);
-                    }
-                } catch (IllegalArgumentException e) {
                 }
+            } catch (e: IllegalArgumentException) {
             }
-        });
+        }
 
         // Setting Number Attributes -------------------------------
-/*
+        /*
         // Sets tickHeight
         final TextView tickHeight = (TextView) findViewById(R.id.tickHeight);
         SeekBar tickHeightSeek = (SeekBar) findViewById(R.id.tickHeightSeek);
@@ -267,11 +257,24 @@ public class MainActivity extends Activity {
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        menuInflater.inflate(R.menu.main, menu)
+        return true
+    }
+
+    companion object {
+
+        // Corresponds to Color.LTGRAY
+        private val DEFAULT_BAR_COLOR = -0x333334
+
+        // Corresponds to android.R.color.holo_blue_light.
+        private val DEFAULT_CONNECTING_LINE_COLOR = -0xcc4a1b
+        private val HOLO_BLUE = -0xcc4a1b
+
+        // Sets the initial values such that the image will be drawn
+        private val DEFAULT_THUMB_COLOR_NORMAL = -1
+        private val DEFAULT_THUMB_COLOR_PRESSED = -1
     }
 
 

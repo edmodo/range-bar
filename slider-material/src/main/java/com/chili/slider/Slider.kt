@@ -59,8 +59,17 @@ class Slider : View {
     private var mBar: Bar? = null
     private var mConnectingLine: ConnectingLine? = null
 
-    private var minSliderValue = 0f
-    private var maxSliderValue = 0f
+    var minSliderValue = 0f
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    var maxSliderValue = 0f
+        set(value) {
+            field = value
+            invalidate()
+        }
 
     private var mListener: OnSliderChangeListener? = null
     /**
@@ -365,7 +374,7 @@ class Slider : View {
             createThumbs()
 
             if (mListener != null) {
-                mListener!!.onIndexChangeListener(this, leftIndex, rightIndex)
+                mListener!!.onIndexChange(this, leftIndex, rightIndex)
             }
         }
 
@@ -421,9 +430,7 @@ class Slider : View {
                 // you know how they interact
                 stepsSize = delta.toInt()
 
-                if (mListener != null) {
-                    mListener!!.onIndexChangeListener(this, leftIndex, rightIndex)
-                }
+                mListener?.onIndexChange(this, leftIndex, rightIndex)
 
             } else {
                 Log.e(TAG, "tickCount less than 2; invalid tickCount. XML input ignored.")
@@ -574,9 +581,7 @@ class Slider : View {
                 leftIndex = newLeftIndex
                 rightIndex = newRightIndex
 
-                if (mListener != null) {
-                    mListener!!.onIndexChangeListener(this, leftIndex, rightIndex)
-                }
+                mListener?.onIndexChange(this, leftIndex, rightIndex)
             }
         }
     }
@@ -612,9 +617,7 @@ class Slider : View {
             leftIndex = newLeftIndex
             rightIndex = newRightIndex
 
-            if (mListener != null) {
-                mListener!!.onIndexChangeListener(this, leftIndex, rightIndex)
-            }
+            mListener?.onIndexChange(this, leftIndex, rightIndex)
         }
     }
 
@@ -643,6 +646,7 @@ class Slider : View {
         thumb.x = nearestTicchakX
         thumb.release()
         invalidate()
+        mListener?.onRelease(this, leftIndex, rightIndex)
     }
 
     /**
@@ -670,7 +674,9 @@ class Slider : View {
      */
     interface OnSliderChangeListener {
 
-        fun onIndexChangeListener(slider: Slider, leftIndicatorValue: Int, rightIndicatorValue: Int)
+        fun onIndexChange(slider: Slider, leftIndicatorValue: Int, rightIndicatorValue: Int)
+
+        fun onRelease(slider: Slider, leftIndicatorValue: Int, rightIndicatorValue: Int)
     }
 
     companion object {
