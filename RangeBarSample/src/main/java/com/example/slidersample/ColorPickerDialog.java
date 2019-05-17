@@ -1,5 +1,5 @@
 
-package com.example.rangebarsample;
+package com.example.slidersample;
 
 import android.app.Dialog;
 import android.content.Context;

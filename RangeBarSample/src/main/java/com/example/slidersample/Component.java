@@ -1,5 +1,5 @@
 
-package com.example.rangebarsample;
+package com.example.slidersample;
 
 /**
  * Enumeration of the components to be changed in colorChanged. Only needed for

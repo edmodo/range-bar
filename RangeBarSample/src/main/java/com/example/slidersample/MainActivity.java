@@ -1,5 +1,5 @@
 
-package com.example.rangebarsample;
+package com.example.slidersample;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.edmodo.slider.Slider;
+import eu.marcocattaneo.slider.Slider;
 
 public class MainActivity extends Activity {
 

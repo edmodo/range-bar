@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Edmodo, Inc. 
+ * Copyright 2019, Marco Cattaneo
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License.
  * You may obtain a copy of the License in the LICENSE file, or at:
@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License. 
  */
 
-package com.edmodo.slider
+package eu.marcocattaneo.slider
 
 import android.content.Context
 import android.graphics.Canvas
@@ -22,6 +22,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import com.marcocattaneo.slider.R
 
 /**
  * The RangeBar is a double-sided version of a [android.widget.SeekBar]
@@ -61,7 +62,7 @@ class Slider : View {
     private var minSliderValue = 0f
     private var maxSliderValue = 0f
 
-    private var mListener: Slider.OnSliderChangeListener? = null
+    private var mListener: OnSliderChangeListener? = null
     /**
      * Gets the index of the left-most thumb.
      *
@@ -283,7 +284,7 @@ class Slider : View {
      * @param listener the RangeBar notification listener; null to remove any
      * existing listener
      */
-    fun setOnRangeBarChangeListener(listener: Slider.OnSliderChangeListener) {
+    fun setOnRangeBarChangeListener(listener: OnSliderChangeListener) {
         mListener = listener
     }
 
