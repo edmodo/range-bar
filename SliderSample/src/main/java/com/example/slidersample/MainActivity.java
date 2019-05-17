@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import eu.marcocattaneo.slider.Slider;
+import com.chili.slider.Slider;
 
 public class MainActivity extends Activity {
 

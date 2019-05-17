@@ -23,7 +23,7 @@
             android:text="@string/title"
             android:textSize="40sp" />
 
-        <eu.marcocattaneo.slider.Slider
+        <com.chili.slider.Slider
             xmlns:custom="http://schemas.android.com/apk/res-auto"
             android:id="@+id/rangebar1"
             android:layout_width="match_parent"

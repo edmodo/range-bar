@@ -1,2 +1,2 @@
-include ':slider'
-include ':RangeBarSample'
+include ':slider-material'
+include ':SliderSample'
