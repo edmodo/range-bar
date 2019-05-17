@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.Log
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 
@@ -176,24 +177,24 @@ class Slider : View {
         val height: Int
 
         // Get measureSpec mode and size values.
-        val measureWidthMode = View.MeasureSpec.getMode(widthMeasureSpec)
-        val measureHeightMode = View.MeasureSpec.getMode(heightMeasureSpec)
-        val measureWidth = View.MeasureSpec.getSize(widthMeasureSpec)
-        val measureHeight = View.MeasureSpec.getSize(heightMeasureSpec)
+        val measureWidthMode = MeasureSpec.getMode(widthMeasureSpec)
+        val measureHeightMode = MeasureSpec.getMode(heightMeasureSpec)
+        val measureWidth = MeasureSpec.getSize(widthMeasureSpec)
+        val measureHeight = MeasureSpec.getSize(heightMeasureSpec)
 
         // The RangeBar width should be as large as possible.
-        if (measureWidthMode == View.MeasureSpec.AT_MOST) {
+        if (measureWidthMode == MeasureSpec.AT_MOST) {
             width = measureWidth
-        } else if (measureWidthMode == View.MeasureSpec.EXACTLY) {
+        } else if (measureWidthMode == MeasureSpec.EXACTLY) {
             width = measureWidth
         } else {
             width = mDefaultWidth
         }
 
         // The RangeBar height should be as small as possible.
-        if (measureHeightMode == View.MeasureSpec.AT_MOST) {
+        if (measureHeightMode == MeasureSpec.AT_MOST) {
             height = Math.min(mDefaultHeight, measureHeight)
-        } else if (measureHeightMode == View.MeasureSpec.EXACTLY) {
+        } else if (measureHeightMode == MeasureSpec.EXACTLY) {
             height = measureHeight
         } else {
             height = mDefaultHeight
@@ -372,7 +373,16 @@ class Slider : View {
         requestLayout()
     }
 
-    // Private Methods /////////////////////////////////////////////////////////
+    private fun fetchAccentColor(): Int {
+        val typedValue = TypedValue()
+
+        val a = context.obtainStyledAttributes(typedValue.data, intArrayOf(R.attr.colorAccent))
+        val color = a.getColor(0, 0)
+
+        a.recycle()
+
+        return color
+    }
 
     /**
      * Does all the functions of the constructor for RangeBar. Called by both
@@ -386,13 +396,14 @@ class Slider : View {
         val ta = context.obtainStyledAttributes(attrs, R.styleable.Slider, 0, 0)
 
         try {
+            val colorAccent = fetchAccentColor()
 
             mBarWeight = ta.getDimension(R.styleable.Slider_barWeight, DEFAULT_BAR_WEIGHT_PX)
-            mBarColor = ta.getColor(R.styleable.Slider_barColor, DEFAULT_BAR_COLOR)
+            mBarColor = ta.getColor(R.styleable.Slider_barColor, colorAccent)
             mConnectingLineWeight = ta.getDimension(R.styleable.Slider_connectingLineWeight, DEFAULT_CONNECTING_LINE_WEIGHT_PX)
-            mConnectingLineColor = ta.getColor(R.styleable.Slider_connectingLineColor, DEFAULT_CONNECTING_LINE_COLOR)
+            mConnectingLineColor = ta.getColor(R.styleable.Slider_connectingLineColor, colorAccent)
             mThumbRadiusDP = ta.getDimension(R.styleable.Slider_indicatorRadius, DEFAULT_THUMB_RADIUS_DP)
-            mIndicatorColor = ta.getColor(R.styleable.Slider_indicatorColor, DEFAULT_THUMB_COLOR_NORMAL)
+            mIndicatorColor = ta.getColor(R.styleable.Slider_indicatorColor, colorAccent)
 
             minSliderValue = ta.getFloat(R.styleable.Slider_minValue, 0f)
             maxSliderValue = ta.getFloat(R.styleable.Slider_maxValue, 0f)
@@ -667,8 +678,6 @@ class Slider : View {
         private val TAG = "Slider"
 
         // Default values for variables
-        private const val DEFAULT_TICK_COUNT = 3
-        private const val DEFAULT_TICK_HEIGHT_DP = 24f
         private const val DEFAULT_BAR_WEIGHT_PX = 2f
         private const val DEFAULT_BAR_COLOR = Color.LTGRAY
         private const val DEFAULT_CONNECTING_LINE_WEIGHT_PX = 4f
@@ -679,6 +688,5 @@ class Slider : View {
         // Indicator value tells Thumb.java whether it should draw the circle or not
         private const val DEFAULT_THUMB_RADIUS_DP = -1f
         private const val DEFAULT_THUMB_COLOR_NORMAL = -1
-        private const val DEFAULT_THUMB_COLOR_PRESSED = -1
     }
 }

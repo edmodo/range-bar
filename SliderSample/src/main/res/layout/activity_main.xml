@@ -32,8 +32,6 @@
             android:layout_marginTop="50dp"
             custom:minValue="100"
             custom:maxValue="300"
-            custom:connectingLineColor="@color/colorAccent"
-            custom:indicatorColor="@color/colorAccent"
             custom:indicatorRadius="2.5dp"/>
 
         <LinearLayout
