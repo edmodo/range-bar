@@ -58,10 +58,10 @@ class MainActivity : Activity() {
                 Toast.makeText(this@MainActivity, "Changed: $leftIndicatorValue $rightIndicatorValue", Toast.LENGTH_LONG).show()
             }
 
-            override fun onIndexChange(slider: Slider, leftThumbIndex: Int, rightThumbIndex: Int) {
+            override fun onIndexChange(slider: Slider, leftIndicatorValue: Int, rightIndicatorValue: Int) {
 
-                leftIndexValue.setText("$leftThumbIndex")
-                rightIndexValue.setText("$rightThumbIndex")
+                leftIndexValue.setText("$leftIndicatorValue")
+                rightIndexValue.setText("$rightIndicatorValue")
             }
 
         }

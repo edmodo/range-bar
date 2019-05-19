@@ -11,6 +11,7 @@
         <attr name="connectingLineColor" format="reference|color" />
         <attr name="indicatorRadius" format="dimension" />
         <attr name="indicatorColor" format="reference|color"/>
+        <attr format="color" name="colorAccent"/>
     </declare-styleable>
 
 </resources>
