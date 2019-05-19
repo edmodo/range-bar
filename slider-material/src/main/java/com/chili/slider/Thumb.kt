@@ -30,7 +30,7 @@ internal class Thumb(ctx: Context, private val mY: Float, private var indicatorC
     // Variables to store half the width/height for easier calculation.
 
     val halfWidth: Float
-    val halfHeight: Float
+    private val halfHeight: Float
 
     private val mHalfWidthPressed: Float
     private val mHalfHeightPressed: Float
@@ -40,14 +40,14 @@ internal class Thumb(ctx: Context, private val mY: Float, private var indicatorC
         private set
 
     // The current x-position of the thumb in the parent view.
-    var x: Float = 0.toFloat()
+    var x: Float
 
     // mPaint to draw the thumbs if attributes are selected
-    private var mPaintNormal: Paint? = null
-    private var mPaintPressed: Paint? = null
+    private val mPaintNormal: Paint = Paint()
+    private val mPaintPressed: Paint = Paint()
 
     // Radius of the new thumb if selected
-    private var mThumbRadiusPx: Float = 0.toFloat()
+    private val mThumbRadiusPx: Float
 
     init {
 
@@ -55,12 +55,12 @@ internal class Thumb(ctx: Context, private val mY: Float, private var indicatorC
 
         // If one of the attributes are set, but the others aren't, set the
         // attributes to default
-        if (thumbRadiusDP == -1f)
-            mThumbRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+        this.mThumbRadiusPx = if (thumbRadiusDP == -1f)
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                     DEFAULT_THUMB_RADIUS_DP,
                     res.displayMetrics)
         else
-            mThumbRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                     thumbRadiusDP,
                     res.displayMetrics)
 
@@ -68,28 +68,26 @@ internal class Thumb(ctx: Context, private val mY: Float, private var indicatorC
             indicatorColor = DEFAULT_THUMB_COLOR_NORMAL
 
         // Creates the paint and sets the Paint values
-        mPaintNormal = Paint()
-        mPaintNormal!!.color = indicatorColor
-        mPaintNormal!!.isAntiAlias = true
+        this.mPaintNormal.color = indicatorColor
+        this.mPaintNormal.isAntiAlias = true
 
-        mPaintPressed = Paint()
-        mPaintPressed!!.color = indicatorColor
-        mPaintPressed!!.alpha = 50
-        mPaintPressed!!.isAntiAlias = true
+        this.mPaintPressed.color = indicatorColor
+        this.mPaintPressed.alpha = 50
+        this.mPaintPressed.isAntiAlias = true
 
-        halfWidth = mThumbRadiusPx
-        halfHeight = mThumbRadiusPx
+        this.halfWidth = mThumbRadiusPx
+        this.halfHeight = mThumbRadiusPx
 
-        mHalfWidthPressed = mThumbRadiusPx
-        mHalfHeightPressed = mThumbRadiusPx
+        this.mHalfWidthPressed = mThumbRadiusPx
+        this.mHalfHeightPressed = mThumbRadiusPx
 
         // Sets the minimum touchable area, but allows it to expand based on
         // image size
         val targetRadius = Math.max(MINIMUM_TARGET_RADIUS_DP, thumbRadiusDP).toInt()
 
-        mTargetRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, targetRadius.toFloat(), res.displayMetrics)
+        this.mTargetRadiusPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, targetRadius.toFloat(), res.displayMetrics)
 
-        x = halfWidth
+        this.x = halfWidth
     }
 
     fun press() {
@@ -119,12 +117,14 @@ internal class Thumb(ctx: Context, private val mY: Float, private var indicatorC
      */
     fun draw(canvas: Canvas) {
 
-        // Otherwise use a circle to display.
-        if (isPressed) {
-            canvas.drawCircle(x, mY, mThumbRadiusPx * INDICATOR_PRESSED_SCALE_OUTSIDE, mPaintPressed!!)
-            canvas.drawCircle(x, mY, mThumbRadiusPx * INDICATOR_PRESSED_SCALE, mPaintNormal!!)
-        } else {
-            canvas.drawCircle(x, mY, mThumbRadiusPx, mPaintNormal!!)
+        canvas.let {
+            // Otherwise use a circle to display.
+            if (isPressed) {
+                it.drawCircle(this.x, this.mY, this.mThumbRadiusPx * INDICATOR_PRESSED_SCALE_OUTSIDE, mPaintPressed)
+                it.drawCircle(this.x, this.mY, this.mThumbRadiusPx * INDICATOR_PRESSED_SCALE, mPaintNormal)
+            } else {
+                it.drawCircle(this.x, this.mY, this.mThumbRadiusPx, mPaintNormal)
+            }
         }
     }
 

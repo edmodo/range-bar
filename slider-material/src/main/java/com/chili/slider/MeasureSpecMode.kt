@@ -20,7 +20,7 @@ import android.view.View
  * human-readable String. The human-readable String is simply the name of the
  * enum value.
  */
-enum class MeasureSpecMode private constructor(val modeValue: Int) {
+enum class MeasureSpecMode constructor(val modeValue: Int) {
 
     AT_MOST(View.MeasureSpec.AT_MOST),
     EXACTLY(View.MeasureSpec.EXACTLY),
@@ -41,7 +41,7 @@ enum class MeasureSpecMode private constructor(val modeValue: Int) {
 
             val modeValue = View.MeasureSpec.getMode(measureSpec)
 
-            for (mode in MeasureSpecMode.values()) {
+            for (mode in values()) {
                 if (mode.modeValue == modeValue) {
                     return mode
                 }

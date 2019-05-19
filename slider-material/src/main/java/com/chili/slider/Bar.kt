@@ -23,7 +23,12 @@ import kotlin.math.roundToInt
  */
 internal class Bar(val leftX: Float, private val mY: Float, private val barLength: Float, steps: Int, BarWeight: Float, BarColor: Int) {
 
-    private val mPaint: Paint
+    private val mPaint: Paint = Paint().apply {
+        this.color = BarColor
+        this.strokeWidth = BarWeight
+        this.isAntiAlias = true
+    }
+
     /**
      * Get the x-coordinate of the right edge of the bar.
      *
@@ -31,20 +36,8 @@ internal class Bar(val leftX: Float, private val mY: Float, private val barLengt
      */
     val rightX: Float = leftX + barLength
 
-    private var mDeltaMinMaxValue: Int = 0
-    private var mTickDistance: Float = 0f
-
-    init {
-
-        mDeltaMinMaxValue = steps
-        mTickDistance = barLength / mDeltaMinMaxValue
-
-        // Initialize the paint.
-        mPaint = Paint()
-        mPaint.color = BarColor
-        mPaint.strokeWidth = BarWeight
-        mPaint.isAntiAlias = true
-    }
+    private val mDeltaMinMaxValue: Int = steps
+    private val mTickDistance: Float = barLength / mDeltaMinMaxValue
 
     /**
      * Draws the bar on the given Canvas.
@@ -53,7 +46,7 @@ internal class Bar(val leftX: Float, private val mY: Float, private val barLengt
      * View#onDraw()}
      */
     fun draw(canvas: Canvas) {
-        canvas.drawLine(leftX, mY, rightX, mY, mPaint)
+        canvas.drawLine(this.leftX, this.mY, this.rightX, this.mY, this.mPaint)
     }
 
     /**
@@ -66,7 +59,7 @@ internal class Bar(val leftX: Float, private val mY: Float, private val barLengt
 
         val nearestTickIndex = getNearestTickIndex(thumb)
 
-        return leftX + nearestTickIndex * mTickDistance
+        return this.leftX + nearestTickIndex * this.mTickDistance
     }
 
     /**
@@ -77,9 +70,9 @@ internal class Bar(val leftX: Float, private val mY: Float, private val barLengt
      */
     fun getNearestTickIndex(thumb: Thumb?): Int {
 
-        val leftPx = thumb?.x ?: 0f - leftX
+        val leftPx = thumb?.x ?: 0f - this.leftX
 
-        return (mDeltaMinMaxValue.toFloat() * (leftPx / barLength)).roundToInt()
+        return (this.mDeltaMinMaxValue.toFloat() * (leftPx / this.barLength)).roundToInt()
     }
 
 }

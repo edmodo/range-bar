@@ -23,21 +23,13 @@ import android.util.TypedValue
  */
 internal class ConnectingLine (ctx: Context, private val mY: Float, connectingLineWeight: Float, connectingLineColor: Int) {
 
-    private val mPaint: Paint
+    private val mConnectingLineWeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, connectingLineWeight, ctx.resources.displayMetrics)
 
-    private val mConnectingLineWeight: Float
-
-    init {
-
-        val res = ctx.resources
-
-        mConnectingLineWeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, connectingLineWeight, res.displayMetrics)
-
-        // Initialize the paint, set values
-        mPaint = Paint()
-        mPaint.color = connectingLineColor
-        mPaint.strokeWidth = mConnectingLineWeight
-        mPaint.isAntiAlias = true
+    // Initialize the paint, set values
+    private val mPaint = Paint().apply {
+        this.color = connectingLineColor
+        this.strokeWidth = mConnectingLineWeight
+        this.isAntiAlias = true
     }
 
     /**
@@ -48,6 +40,6 @@ internal class ConnectingLine (ctx: Context, private val mY: Float, connectingLi
      * @param rightThumb the right thumb
      */
     fun draw(canvas: Canvas, leftThumb: Thumb, rightThumb: Thumb) {
-        canvas.drawLine(leftThumb.x, mY, rightThumb.x, mY, mPaint)
+        canvas.drawLine(leftThumb.x, this.mY, rightThumb.x, this.mY, this.mPaint)
     }
 }
