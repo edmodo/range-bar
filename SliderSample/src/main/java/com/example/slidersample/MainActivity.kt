@@ -68,6 +68,10 @@ class MainActivity : Activity() {
         val thumbColorPressed = findViewById<View>(R.id.thumbColorPressed) as Button
         val resetThumbColors = findViewById<View>(R.id.resetThumbColors) as Button
         val refreshButton = findViewById<View>(R.id.refresh) as Button
+        val refreshButtonMinMax = findViewById<View>(R.id.refreshMinMax) as Button
+
+        val minEditText = findViewById<EditText>(R.id.minValue)
+        val maxEditText = findViewById<EditText>(R.id.maxValue)
 
         // Sets initial colors for the Color buttons
         barColor.setTextColor(DEFAULT_BAR_COLOR)
@@ -84,7 +88,7 @@ class MainActivity : Activity() {
         val rightIndexValue = findViewById<View>(R.id.rightIndexValue) as EditText
 
         // Sets the display values of the indices
-        rangebar!!.setOnRangeBarChangeListener(object : Slider.OnSliderChangeListener {
+        rangebar?.onSliderChangeListener = object : Slider.OnSliderChangeListener {
 
             override fun onRelease(slider: Slider, leftIndicatorValue: Int, rightIndicatorValue: Int) {
                 Toast.makeText(this@MainActivity, "Changed: $leftIndicatorValue $rightIndicatorValue", Toast.LENGTH_LONG).show()
@@ -96,10 +100,20 @@ class MainActivity : Activity() {
                 rightIndexValue.setText("" + rightThumbIndex)
             }
 
-        })
+        }
+
+        refreshButtonMinMax.setOnClickListener {
+            val min = minEditText.text.toString().toFloat()
+            val max = maxEditText.text.toString().toFloat()
+            rangebar?.minSliderValue = min
+            rangebar?.maxSliderValue = max
+        }
 
         rangebar?.minSliderValue = 100f
         rangebar?.maxSliderValue = 300f
+
+        minEditText.setText("100")
+        maxEditText.setText("300")
 
         rangebar?.setThumbIndices(150, 250)
 

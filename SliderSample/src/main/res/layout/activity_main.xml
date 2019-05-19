@@ -101,6 +101,66 @@
                 android:textColor="#33B5E5"
                 android:textSize="25sp" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/min"
+                        style="@style/RoboTheme"
+                        android:layout_marginTop="0dp"
+                        android:text="@string/minLabel" />
+
+                    <EditText
+                        android:id="@+id/minValue"
+                        style="@style/RoboTheme"
+                        android:layout_marginTop="0dp"
+                        android:inputType="number"
+                        android:text="0"
+                        android:textSize="35sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/max"
+                        style="@style/RoboTheme"
+                        android:layout_marginTop="0dp"
+                        android:text="@string/maxLabel" />
+
+                    <EditText
+                        android:id="@+id/maxValue"
+                        style="@style/RoboTheme"
+                        android:layout_marginTop="0dp"
+                        android:inputType="number"
+                        android:text="0"
+                        android:textSize="35sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/refreshMinMax"
+                style="@style/RoboTheme"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="@string/refresh_minmax"
+                android:textColor="#33B5E5"
+                android:textSize="25sp" />
+
             <TextView
                 android:id="@+id/tickHeight"
                 style="@style/RoboTheme"

@@ -22,5 +22,8 @@
     <string name="rightIndexValue">6</string>
     <string name="rightIndex">rightIndex</string>
     <string name="refresh">Refresh Indices</string>
+    <string name="refresh_minmax">REFRESH MIN/MAX</string>
+    <string name="maxLabel">Max</string>
+    <string name="minLabel">Min</string>
 
 </resources>

@@ -62,16 +62,16 @@ class Slider : View {
     var minSliderValue = 0f
         set(value) {
             field = value
-            invalidate()
+            invalidateSliderView()
         }
 
     var maxSliderValue = 0f
         set(value) {
             field = value
-            invalidate()
+            invalidateSliderView()
         }
 
-    private var mListener: OnSliderChangeListener? = null
+    var onSliderChangeListener: OnSliderChangeListener? = null
     /**
      * Gets the index of the left-most thumb.
      *
@@ -126,7 +126,7 @@ class Slider : View {
         sliderInit(context, attrs)
     }
 
-    public override fun onSaveInstanceState(): Parcelable? {
+    override fun onSaveInstanceState(): Parcelable? {
 
         val bundle = Bundle()
 
@@ -151,7 +151,11 @@ class Slider : View {
         return bundle
     }
 
-    public override fun onRestoreInstanceState(state: Parcelable) {
+    private fun invalidateSliderView() {
+        setThumbIndices(this.leftIndex, this.rightIndex)
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable) {
 
         if (state is Bundle) {
 
@@ -287,17 +291,6 @@ class Slider : View {
     }
 
     /**
-     * Sets a listener to receive notifications of changes to the RangeBar. This
-     * will overwrite any existing set listeners.
-     *
-     * @param listener the RangeBar notification listener; null to remove any
-     * existing listener
-     */
-    fun setOnRangeBarChangeListener(listener: OnSliderChangeListener) {
-        mListener = listener
-    }
-
-    /**
      * Set the weight of the bar line and the tick lines in the range bar.
      *
      * @param barWeight Float specifying the weight of the bar and tick lines in
@@ -361,8 +354,13 @@ class Slider : View {
     fun setThumbIndices(leftThumbIndex: Int, rightThumbIndex: Int) {
         if (indexOutOfRange(leftThumbIndex, rightThumbIndex)) {
 
-            Log.e(TAG, "A thumb index is out of bounds. Check that it is between 0 and mTickCount - 1")
-            throw IllegalArgumentException("A thumb index is out of bounds. Check that it is between 0 and mTickCount - 1")
+            if (leftThumbIndex < minSliderValue) {
+                setThumbIndices(minSliderValue.toInt(), rightThumbIndex)
+            }
+
+            if (rightThumbIndex > maxSliderValue) {
+                setThumbIndices(leftThumbIndex, maxSliderValue.toInt())
+            }
 
         } else {
 
@@ -373,9 +371,7 @@ class Slider : View {
             rightIndex = rightThumbIndex
             createThumbs()
 
-            if (mListener != null) {
-                mListener!!.onIndexChange(this, leftIndex, rightIndex)
-            }
+            onSliderChangeListener?.onIndexChange(this, leftIndex, rightIndex)
         }
 
         invalidate()
@@ -430,7 +426,7 @@ class Slider : View {
                 // you know how they interact
                 stepsSize = delta.toInt()
 
-                mListener?.onIndexChange(this, leftIndex, rightIndex)
+                onSliderChangeListener?.onIndexChange(this, leftIndex, rightIndex)
 
             } else {
                 Log.e(TAG, "tickCount less than 2; invalid tickCount. XML input ignored.")
@@ -581,7 +577,7 @@ class Slider : View {
                 leftIndex = newLeftIndex
                 rightIndex = newRightIndex
 
-                mListener?.onIndexChange(this, leftIndex, rightIndex)
+                onSliderChangeListener?.onIndexChange(this, leftIndex, rightIndex)
             }
         }
     }
@@ -617,7 +613,7 @@ class Slider : View {
             leftIndex = newLeftIndex
             rightIndex = newRightIndex
 
-            mListener?.onIndexChange(this, leftIndex, rightIndex)
+            onSliderChangeListener?.onIndexChange(this, leftIndex, rightIndex)
         }
     }
 
@@ -646,7 +642,7 @@ class Slider : View {
         thumb.x = nearestTicchakX
         thumb.release()
         invalidate()
-        mListener?.onRelease(this, leftIndex, rightIndex)
+        onSliderChangeListener?.onRelease(this, leftIndex, rightIndex)
     }
 
     /**
