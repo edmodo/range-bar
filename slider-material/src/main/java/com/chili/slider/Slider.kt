@@ -54,8 +54,8 @@ class Slider : View {
     private val mDefaultWidth = 500
     private val mDefaultHeight = 100
 
-    private lateinit var mLeftThumb: Thumb
-    private lateinit var mRightThumb: Thumb
+    private var mLeftThumb: Thumb? = null
+    private var mRightThumb: Thumb? = null
     private var mBar: Bar? = null
     private var mConnectingLine: ConnectingLine? = null
 
@@ -94,7 +94,7 @@ class Slider : View {
      * @return float marginLeft
      */
     private val marginLeft: Float
-        get() = mLeftThumb.halfWidth
+        get() = mLeftThumb?.halfWidth ?: 0f
 
     /**
      * Get yPos in each of the public attribute methods.
@@ -152,6 +152,8 @@ class Slider : View {
     }
 
     private fun invalidateSliderView() {
+        stepsSize = (maxSliderValue - minSliderValue).toInt()
+        createBar()
         setThumbIndices(this.leftIndex, this.rightIndex)
     }
 
@@ -196,21 +198,17 @@ class Slider : View {
         val measureHeight = MeasureSpec.getSize(heightMeasureSpec)
 
         // The RangeBar width should be as large as possible.
-        if (measureWidthMode == MeasureSpec.AT_MOST) {
-            width = measureWidth
-        } else if (measureWidthMode == MeasureSpec.EXACTLY) {
-            width = measureWidth
-        } else {
-            width = mDefaultWidth
+        width = when (measureWidthMode) {
+            MeasureSpec.AT_MOST -> measureWidth
+            MeasureSpec.EXACTLY -> measureWidth
+            else -> mDefaultWidth
         }
 
         // The RangeBar height should be as small as possible.
-        if (measureHeightMode == MeasureSpec.AT_MOST) {
-            height = Math.min(mDefaultHeight, measureHeight)
-        } else if (measureHeightMode == MeasureSpec.EXACTLY) {
-            height = measureHeight
-        } else {
-            height = mDefaultHeight
+        height = when (measureHeightMode) {
+            MeasureSpec.AT_MOST -> Math.min(mDefaultHeight, measureHeight)
+            MeasureSpec.EXACTLY -> measureHeight
+            else -> mDefaultHeight
         }
 
         setMeasuredDimension(width, height)
@@ -236,13 +234,13 @@ class Slider : View {
                 mThumbRadiusDP)
 
         // Create the underlying bar.
-        val marginLeft = mLeftThumb.halfWidth
+        val marginLeft = mLeftThumb?.halfWidth ?: 0f
         val barLength = w - 2 * marginLeft
         mBar = Bar(marginLeft, yPos, barLength, stepsSize, mBarWeight, mBarColor)
 
         // Initialize thumbs to the desired indices
-        mLeftThumb.x = getThumbLeftPosition()
-        mRightThumb.x = getThumbRightPosition()
+        mLeftThumb?.x = getThumbLeftPosition()
+        mRightThumb?.x = getThumbRightPosition()
 
         // Create the line connecting the two thumbs.
         mConnectingLine = ConnectingLine(ctx, yPos, mConnectingLineWeight, mConnectingLineColor)
@@ -253,10 +251,12 @@ class Slider : View {
 
         mBar?.draw(canvas)
 
-        mConnectingLine?.draw(canvas, mLeftThumb, mRightThumb)
+        if (mLeftThumb != null && mRightThumb != null) {
+            mConnectingLine?.draw(canvas, mLeftThumb!!, mRightThumb!!)
+        }
 
-        mLeftThumb.draw(canvas)
-        mRightThumb.draw(canvas)
+        mLeftThumb?.draw(canvas)
+        mRightThumb?.draw(canvas)
 
     }
 
@@ -446,12 +446,13 @@ class Slider : View {
      */
     private fun createBar() {
 
-        mBar = Bar(marginLeft,
-                yPos,
-                barLength,
-                stepsSize,
-                mBarWeight,
-                mBarColor)
+        if (mLeftThumb != null)
+            mBar = Bar(marginLeft,
+                    yPos,
+                    barLength,
+                    stepsSize,
+                    mBarWeight,
+                    mBarColor)
         invalidate()
     }
 
@@ -489,8 +490,8 @@ class Slider : View {
                 mThumbRadiusDP)
 
         // Initialize thumbs to the desired indices
-        mLeftThumb.x = getThumbLeftPosition()
-        mRightThumb.x = getThumbRightPosition()
+        mLeftThumb?.x = getThumbLeftPosition()
+        mRightThumb?.x = getThumbRightPosition()
 
         invalidate()
     }
@@ -528,11 +529,11 @@ class Slider : View {
      */
     private fun onActionDown(x: Float, y: Float) {
 
-        if (!mLeftThumb.isPressed && mLeftThumb.isInTargetZone(x, y)) {
+        if (mLeftThumb?.isPressed == false && mLeftThumb?.isInTargetZone(x, y) == true) {
 
             pressThumb(mLeftThumb)
 
-        } else if (!mLeftThumb.isPressed && mRightThumb.isInTargetZone(x, y)) {
+        } else if (mLeftThumb?.isPressed == false && mRightThumb?.isInTargetZone(x, y) == true) {
 
             pressThumb(mRightThumb)
         }
@@ -546,24 +547,24 @@ class Slider : View {
      */
     private fun onActionUp(x: Float) {
 
-        if (mLeftThumb.isPressed) {
+        if (mLeftThumb?.isPressed == true) {
 
             releaseThumb(mLeftThumb)
 
-        } else if (mRightThumb.isPressed) {
+        } else if (mRightThumb?.isPressed == true) {
 
             releaseThumb(mRightThumb)
 
         } else {
 
-            val leftThumbXDistance = Math.abs(mLeftThumb.x - x)
-            val rightThumbXDistance = Math.abs(mRightThumb.x - x)
+            val leftThumbXDistance = Math.abs(mLeftThumb?.x ?: 0f - x)
+            val rightThumbXDistance = Math.abs(mRightThumb?.x ?: 0f - x)
 
             if (leftThumbXDistance < rightThumbXDistance) {
-                mLeftThumb.x = x
+                mLeftThumb?.x = x
                 releaseThumb(mLeftThumb)
             } else {
-                mRightThumb.x = x
+                mRightThumb?.x = x
                 releaseThumb(mRightThumb)
             }
 
@@ -590,14 +591,14 @@ class Slider : View {
     private fun onActionMove(x: Float) {
 
         // Move the pressed thumb to the new x-position.
-        if (mLeftThumb.isPressed) {
+        if (mLeftThumb?.isPressed == true) {
             moveThumb(mLeftThumb, x)
-        } else if (mRightThumb.isPressed) {
+        } else if (mRightThumb?.isPressed == true) {
             moveThumb(mRightThumb, x)
         }
 
         // If the thumbs have switched order, fix the references.
-        if (mLeftThumb.x > mRightThumb.x) {
+        if (mLeftThumb?.x ?: 0f > mRightThumb?.x ?: 0f) {
             val temp = mLeftThumb
             mLeftThumb = mRightThumb
             mRightThumb = temp
@@ -623,10 +624,10 @@ class Slider : View {
      *
      * @param thumb the thumb to press
      */
-    private fun pressThumb(thumb: Thumb) {
+    private fun pressThumb(thumb: Thumb?) {
         if (mFirstSetTickCount)
             mFirstSetTickCount = false
-        thumb.press()
+        thumb?.press()
         invalidate()
     }
 
@@ -636,11 +637,11 @@ class Slider : View {
      *
      * @param thumb the thumb to release
      */
-    private fun releaseThumb(thumb: Thumb) {
+    private fun releaseThumb(thumb: Thumb?) {
 
-        val nearestTicchakX = mBar!!.getNearestTickCoordinate(thumb)
-        thumb.x = nearestTicchakX
-        thumb.release()
+        val nearestTicchakX = mBar?.getNearestTickCoordinate(thumb)
+        thumb?.x = nearestTicchakX ?: 0f
+        thumb?.release()
         invalidate()
         onSliderChangeListener?.onRelease(this, leftIndex, rightIndex)
     }
@@ -651,14 +652,14 @@ class Slider : View {
      * @param thumb the thumb to move
      * @param x the x-coordinate to move the thumb to
      */
-    private fun moveThumb(thumb: Thumb, x: Float) {
+    private fun moveThumb(thumb: Thumb?, x: Float) {
 
         // If the user has moved their finger outside the range of the bar,
         // do not move the thumbs past the edge.
         if (x < mBar!!.leftX || x > mBar!!.rightX) {
             // Do nothing.
         } else {
-            thumb.x = x
+            thumb?.x = x
             invalidate()
         }
     }

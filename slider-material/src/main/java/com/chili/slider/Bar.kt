@@ -62,7 +62,7 @@ internal class Bar(val leftX: Float, private val mY: Float, private val barLengt
      * @param x the x-coordinate to find the nearest tick for
      * @return the x-coordinate of the nearest tick
      */
-    fun getNearestTickCoordinate(thumb: Thumb): Float {
+    fun getNearestTickCoordinate(thumb: Thumb?): Float {
 
         val nearestTickIndex = getNearestTickIndex(thumb)
 
@@ -75,9 +75,9 @@ internal class Bar(val leftX: Float, private val mY: Float, private val barLengt
      * @param thumb the Thumb to find the nearest tick for
      * @return the zero-based index of the nearest tick
      */
-    fun getNearestTickIndex(thumb: Thumb): Int {
+    fun getNearestTickIndex(thumb: Thumb?): Int {
 
-        val leftPx = thumb.x - leftX
+        val leftPx = thumb?.x ?: 0f - leftX
 
         return (mDeltaMinMaxValue.toFloat() * (leftPx / barLength)).roundToInt()
     }
