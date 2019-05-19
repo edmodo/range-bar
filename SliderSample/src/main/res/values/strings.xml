@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">RangeBar Sample</string>
-    <string name="action_settings">Settings</string>
-    <string name="title">RangeBar</string>
-    <string name="tickCount">tickCount = 7</string>
-    <string name="tickHeight">tickHeight = 24</string>
-    <string name="barWeight">barWeight = 2</string>
-    <string name="barColor">barColor = #CCCCCC</string>
+    <string name="app_name">Slider Sample</string>
+    <string name="action_settings">Slider</string>
+    <string name="title">Slider</string>
     <string name="connectingLineWeight">connectingLineWeight = 4</string>
     <string name="connectingLineColor">connectingLineColor = #33B5E5</string>
     <string name="thumbRadius">thumbRadius = N/A</string>
