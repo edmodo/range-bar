@@ -78,14 +78,26 @@ class Slider : View {
      * @return the 0-based index of the left thumb
      */
     var leftIndex = 0
-        private set
+        private set(value) {
+            field = if (value < minSliderValue) {
+                minSliderValue.toInt()
+            } else {
+                value
+            }
+        }
     /**
      * Gets the index of the right-most thumb.
      *
      * @return the 0-based index of the right thumb
      */
     var rightIndex = 0
-        private set
+        private set(value) {
+            field = if (value > maxSliderValue) {
+                maxSliderValue.toInt()
+            } else {
+                value
+            }
+        }
 
     /**
      * Get marginLeft in each of the public attribute methods.
@@ -619,8 +631,8 @@ class Slider : View {
      */
     private fun releaseThumb(thumb: Thumb?) {
 
-        val nearestTicchakX = this.mBar?.getNearestTickCoordinate(thumb)
-        thumb?.x = nearestTicchakX ?: 0f
+        val nearestTickX = this.mBar?.getNearestTickCoordinate(thumb)
+        thumb?.x = nearestTickX ?: 0f
         thumb?.release()
         invalidate()
         this.onSliderChangeListener?.onRelease(this, this.leftIndex, this.rightIndex)

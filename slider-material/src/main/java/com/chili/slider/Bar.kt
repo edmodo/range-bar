@@ -39,6 +39,10 @@ internal class Bar(val leftX: Float, private val mY: Float, private val barLengt
     private val mDeltaMinMaxValue: Int = steps
     private val mTickDistance: Float = barLength / mDeltaMinMaxValue
 
+    private val leftLimitPercent = rightX * 0.1
+
+    private val rightLimitPercent = rightX - leftLimitPercent
+
     /**
      * Draws the bar on the given Canvas.
      *
@@ -59,7 +63,12 @@ internal class Bar(val leftX: Float, private val mY: Float, private val barLengt
 
         val nearestTickIndex = getNearestTickIndex(thumb)
 
-        return this.leftX + nearestTickIndex * this.mTickDistance
+        val x = this.leftX + nearestTickIndex * this.mTickDistance
+        return when {
+            x < leftLimitPercent -> leftX
+            x > rightLimitPercent -> rightX
+            else -> x
+        }
     }
 
     /**
